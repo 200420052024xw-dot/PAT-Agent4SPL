@@ -1,0 +1,20 @@
+{
+  "source": "F:\\PAT-Agent-master\\inputs\\pat_capability_01_reachability.csp",
+  "status": "PASSED",
+  "counts": {
+    "total": 1,
+    "valid": 1,
+    "invalid": 0,
+    "unknown": 0
+  },
+  "refinement_enabled": false,
+  "refinement_model": null,
+  "rounds": [
+    {
+      "round": 0,
+      "status": "PASSED"
+    }
+  ],
+  "stop_reason": "INITIAL_VERIFICATION_PASSED",
+  "final_file": "final.csp"
+}

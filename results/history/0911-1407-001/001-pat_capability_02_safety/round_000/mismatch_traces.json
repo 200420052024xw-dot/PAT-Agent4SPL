@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert System |= [] !bad;",
+    "trace": "<init -> lock>",
+    "current_result": "INVALID",
+    "desired_result": "VALID",
+    "verification_text": "The Assertion (System() |= []! bad) is NOT valid.\nA counterexample is presented as follows.\n<init -> lock>"
+  }
+]

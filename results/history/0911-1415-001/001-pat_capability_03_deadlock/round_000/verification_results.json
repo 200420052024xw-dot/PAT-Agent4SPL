@@ -1,0 +1,45 @@
+{
+  "status": "MISMATCH",
+  "elapsed_seconds": 0.409775,
+  "counts": {
+    "total": 1,
+    "valid": 0,
+    "invalid": 1,
+    "unknown": 0
+  },
+  "assertions": [
+    {
+      "index": 1,
+      "assertion": "#assert Engine deadlockfree;",
+      "expected": "VALID",
+      "actual": "INVALID",
+      "matches_expected": false,
+      "trace": "<init -> drive>",
+      "verification_text": "The Assertion (Engine() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> drive>",
+      "elapsed_seconds": 0.409353,
+      "command": [
+        "F:\\PAT-Agent-master\\PAT.Console\\Process-Analysis-Toolkit\\PAT3.Console.exe",
+        "-csp",
+        "-engine",
+        "1",
+        "F:\\PAT-Agent-master\\results\\0911-1415-001\\001-pat_capability_03_deadlock\\round_000\\assertion_001.csp",
+        "F:\\PAT-Agent-master\\results\\0911-1415-001\\001-pat_capability_03_deadlock\\round_000\\pat_output_001.txt"
+      ],
+      "return_code": 0,
+      "stdout": "PAT finished successfully.\n",
+      "stderr": "",
+      "input_file": "assertion_001.csp",
+      "output_file": "pat_output_001.txt",
+      "error": null
+    }
+  ],
+  "mismatches": [
+    {
+      "assertion": "#assert Engine deadlockfree;",
+      "trace": "<init -> drive>",
+      "current_result": "INVALID",
+      "desired_result": "VALID",
+      "verification_text": "The Assertion (Engine() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> drive>"
+    }
+  ]
+}

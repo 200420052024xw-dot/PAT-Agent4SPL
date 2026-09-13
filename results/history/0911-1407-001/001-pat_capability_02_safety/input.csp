@@ -1,0 +1,14 @@
+var doorLocked = 0;
+var ownerInside = 0;
+
+Owner() =
+    enter{ownerInside = 1;} -> Owner();
+
+Door() =
+    lock{doorLocked = 1;} -> Door();
+
+System = Owner() ||| Door();
+
+#define bad (doorLocked == 1 && ownerInside == 0);
+
+#assert System |= [] !bad;

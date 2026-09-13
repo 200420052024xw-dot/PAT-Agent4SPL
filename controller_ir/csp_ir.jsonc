@@ -1,0 +1,66 @@
+{
+  "constants": [
+    {
+      "name":"",
+      "description": "",
+      "value": null
+    }
+  ],
+  "variables": [
+    {
+      "name": "",
+      "description": "",
+      "type": "",
+      "size": null,//仅仅当type为固定长度数组时使用，直接填写数量或者引用值
+      "element_type": null,
+      "options": [],
+      "initial_value": []
+    }
+  ],
+  "process": [
+    {
+      "name": "",
+      "description":"",
+      "parameters": [] //进程参数
+    }
+  ],
+  "transitions": [
+    {
+      "process": "",
+      "guard":"",
+      "event": "",
+      "effects": [],
+      "next_process": {
+        "process_name": "",
+        "arguments": []
+      }
+    }
+  ],
+  "system": {
+    "name": "",
+    "composition": "",//single单进程|interleave各自运行，互不等待|parallel共同事件必须一起执行|interrupt打断
+    "processes": [
+      {
+        "process": "",
+        "arguments": []//与parameters对应
+      }
+    ]
+  },
+  "predicates": [
+    {
+      "name": "",
+      "description": "",
+      "expression": ""
+    }
+  ],
+  "assertions": [
+    {
+      "type": "", // deadlockfree | reachability | ltl
+      "process": "",
+      "predicate": null, // 仅reachability使用
+      "formula": null, // 仅ltl使用
+      "expected": "", // VALID | INVALID
+      "description": ""
+    }
+  ]
+}

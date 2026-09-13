@@ -1,0 +1,67 @@
+{
+  "status": "MISMATCH",
+  "elapsed_seconds": 1.026034,
+  "counts": {
+    "total": 2,
+    "valid": 1,
+    "invalid": 1,
+    "unknown": 0
+  },
+  "assertions": [
+    {
+      "index": 1,
+      "assertion": "#assert EngineSystem deadlockfree;",
+      "expected": "VALID",
+      "actual": "VALID",
+      "matches_expected": true,
+      "trace": null,
+      "verification_text": "The Assertion (EngineSystem() deadlockfree) is VALID.",
+      "elapsed_seconds": 0.46424,
+      "command": [
+        "F:\\PAT-Agent-master\\PAT.Console\\Process-Analysis-Toolkit\\PAT3.Console.exe",
+        "-csp",
+        "-engine",
+        "1",
+        "F:\\PAT-Agent-master\\results\\0910-1622-001\\001-keyless_car_engine_faulty\\round_000\\assertion_001.csp",
+        "F:\\PAT-Agent-master\\results\\0910-1622-001\\001-keyless_car_engine_faulty\\round_000\\pat_output_001.txt"
+      ],
+      "return_code": 0,
+      "stdout": "PAT finished successfully.\n",
+      "stderr": "",
+      "input_file": "assertion_001.csp",
+      "output_file": "pat_output_001.txt",
+      "error": null
+    },
+    {
+      "index": 2,
+      "assertion": "#assert EngineSystem |= [] !drivewithoutfuel;",
+      "expected": "VALID",
+      "actual": "INVALID",
+      "matches_expected": false,
+      "trace": "<init -> start_engine -> start_driving -> stop_driving -> drive_consume_fuel_from_full -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_75 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_50 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_25 -> start_engine -> start_driving>",
+      "verification_text": "The Assertion (EngineSystem() |= []! drivewithoutfuel) is NOT valid.\nA counterexample is presented as follows.\n<init -> start_engine -> start_driving -> stop_driving -> drive_consume_fuel_from_full -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_75 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_50 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_25 -> start_engine -> start_driving>",
+      "elapsed_seconds": 0.560358,
+      "command": [
+        "F:\\PAT-Agent-master\\PAT.Console\\Process-Analysis-Toolkit\\PAT3.Console.exe",
+        "-csp",
+        "F:\\PAT-Agent-master\\results\\0910-1622-001\\001-keyless_car_engine_faulty\\round_000\\assertion_002.csp",
+        "F:\\PAT-Agent-master\\results\\0910-1622-001\\001-keyless_car_engine_faulty\\round_000\\pat_output_002.txt"
+      ],
+      "return_code": 0,
+      "stdout": "PAT finished successfully.\n",
+      "stderr": "",
+      "input_file": "assertion_002.csp",
+      "output_file": "pat_output_002.txt",
+      "error": null
+    }
+  ],
+  "mismatches": [
+    {
+      "assertion": "#assert EngineSystem |= [] !drivewithoutfuel;",
+      "trace": "<init -> start_engine -> start_driving -> stop_driving -> drive_consume_fuel_from_full -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_75 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_50 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_25 -> start_engine -> start_driving>",
+      "current_result": "INVALID",
+      "desired_result": "VALID",
+      "verification_text": "The Assertion (EngineSystem() |= []! drivewithoutfuel) is NOT valid.\nA counterexample is presented as follows.\n<init -> start_engine -> start_driving -> stop_driving -> drive_consume_fuel_from_full -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_75 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_50 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_25 -> start_engine -> start_driving>"
+    }
+  ]
+}

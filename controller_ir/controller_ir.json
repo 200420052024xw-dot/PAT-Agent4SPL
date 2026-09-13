@@ -1,0 +1,443 @@
+{
+  "goal": "A state-driven controller converted from internal_comms_worker.",
+  "slot_information": {
+    "comm_type": {
+      "name": "comm_type",
+      "required": true,
+      "description": "The type of internal communication to generate; drives the branching of subsequent stages",
+      "type": "enum",
+      "default_value": null,
+      "enum_values": [
+        "newsletter",
+        "exec_brief"
+      ]
+    },
+    "email_time_range": {
+      "name": "email_time_range",
+      "required": true,
+      "description": "The time range for retrieving Gmail messages, as a natural language string such as 2024-04-01 to 2024-04-30",
+      "type": "string",
+      "default_value": null
+    },
+    "email_keywords": {
+      "name": "email_keywords",
+      "required": true,
+      "description": "A list of keywords used to search Gmail messages, matched against subject and body",
+      "type": "list",
+      "default_value": []
+    },
+    "email_senders": {
+      "name": "email_senders",
+      "required": true,
+      "description": "A list of sender email addresses to prioritize when retrieving Gmail messages",
+      "type": "list",
+      "default_value": []
+    },
+    "docs_keywords": {
+      "name": "docs_keywords",
+      "required": true,
+      "description": "A list of keywords used to search Google Docs, matched against titles and body content",
+      "type": "list",
+      "default_value": []
+    },
+    "email_evidence": {
+      "name": "email_evidence",
+      "required": true,
+      "description": "The relevant emails retrieved from Gmail; each item contains sender, date, subject and a body summary",
+      "type": "list",
+      "default_value": []
+    },
+    "docs_evidence": {
+      "name": "docs_evidence",
+      "required": true,
+      "description": "The relevant documents retrieved from Google Docs; each item contains title, last modified time and a content summary",
+      "type": "list",
+      "default_value": []
+    },
+    "newsletter_draft": {
+      "name": "newsletter_draft",
+      "required": true,
+      "description": "The body of the internal document generated from the collected email and document evidence",
+      "type": "string",
+      "default_value": null,
+      "state_schema": {
+        "presented": {
+          "description": "The generated document draft has been presented to the user for review.",
+          "type": "boolean",
+          "default": false,
+          "transitions": [
+            {
+              "trigger": {
+                "type": "action_succeeded",
+                "action": "PRESENT_RESULT"
+              },
+              "set_to": true
+            }
+          ]
+        },
+        "revised": {
+          "description": "The generated document draft has been revised according to user feedback or policy feedback.",
+          "type": "boolean",
+          "default": false,
+          "transitions": [
+            {
+              "trigger": {
+                "type": "action_succeeded",
+                "action": "REVISE_NEWSLETTER"
+              },
+              "set_to": true
+            },
+            {
+              "trigger": {
+                "type": "action_succeeded",
+                "action": "GENERATE_NEWSLETTER"
+              },
+              "set_to": false
+            }
+          ]
+        }
+      }
+    }
+  },
+  "participants": {
+    "console": {
+      "interactive_object": "human",
+      "description": "The console interface for natural language interaction with the user; asks questions, collects input, and presents the final result.",
+      "interface": "program.handler.ConsoleHandler",
+      "participant_config": {
+        "io_channel": "@io_channel"
+      }
+    },
+    "google_service": {
+      "interactive_object": "traditional_system",
+      "description": "A unified interface encapsulating the Gmail API and Google Drive API; accepts structured query parameters and returns matching email or document lists."
+    },
+    "search_gmail": {
+      "interactive_object": "traditional_system",
+      "description": "External-system handler core. Searches the user's Gmail inbox by date range, keywords, and sender list. Runs the InstalledAppFlow OAuth on first call, caches the Gmail service object on a function attribute keyed by (credentials_path, token_path), and supports an HTTP proxy.",
+      "interface": "program.handler.SearchGmailHandler",
+      "participant_config": {
+        "path_of_credentials": "D:/wu_project/cnlp_studio/cnlp_studio_backend/modules/liu_yang/cnlp_compiler_26_05_28/cnlp_agent/old_controller/internal_comms/credentials.json",
+        "path_of_token": "D:/wu_project/cnlp_studio/cnlp_studio_backend/modules/liu_yang/cnlp_compiler_26_05_28/cnlp_agent/old_controller/internal_comms/token.json",
+        "proxy_host": "127.0.0.1",
+        "proxy_port": 7890
+      }
+    },
+    "search_google_docs": {
+      "interactive_object": "traditional_system",
+      "description": "External-system handler core. Searches the user's Google Drive for documents whose body contains all of the given keywords, fetches each matching document's plain text via the Docs API. Same OAuth + caching + proxy pattern as search_gmail.",
+      "interface": "program.handler.SearchGoogleDocsHandler",
+      "participant_config": {
+        "path_of_credentials": "D:/wu_project/cnlp_studio/cnlp_studio_backend/modules/liu_yang/cnlp_compiler_26_05_28/cnlp_agent/old_controller/internal_comms/credentials.json",
+        "path_of_token": "D:/wu_project/cnlp_studio/cnlp_studio_backend/modules/liu_yang/cnlp_compiler_26_05_28/cnlp_agent/old_controller/internal_comms/token.json",
+        "proxy_host": "127.0.0.1",
+        "proxy_port": 7890
+      }
+    },
+    "generate_newsletter": {
+      "interactive_object": "traditional_system",
+      "description": "Internal-action core. Takes a list of emails, a list of docs, and a time_range, and uses a single LLM call to compose a structured internal newsletter from those materials. Reads OPENAI_API_KEY / BASE_URL / OPENAI_MODEL from env.",
+      "interface": "program.handler.GenerateNewsletterHandler",
+      "participant_config": {
+        "api_key": "sk-aiDWdVGTehE3Hsk79c34Dc7cA55249F99060207961C35e4d",
+        "base_url": "https://api.rcouyi.com/v1",
+        "model_name": "deepseek-v4-pro"
+      }
+    },
+    "revise_newsletter": {
+      "interactive_object": "traditional_system",
+      "description": "Internal-action core. Revises a newsletter using the provided revision instructions.",
+      "interface": "program.handler.ReviseNewsletterHandler",
+      "participant_config": {
+        "BASE_URL": "https://api.rcouyi.com/v1",
+        "OPENAI_API_KEY": "sk-aiDWdVGTehE3Hsk79c34Dc7cA55249F99060207961C35e4d",
+        "OPENAI_MODEL": "deepseek-v4-pro"
+      }
+    }
+  },
+  "policies": {
+    "newsletter_draft_requirements": {
+      "activate_condition": "input.slots.newsletter_draft != null",
+      "priority": 1,
+      "description": "The body of newsletter_draft must be written in English and contain no more than 300 words.",
+      "parameters": {
+        "newsletter_draft": "@slot.newsletter_draft"
+      }
+    }
+  },
+  "stages": {
+    "collect_requirements": {
+      "stage_name": "collect_requirements",
+      "stage_goal": "Establish the requested communication type and complete retrieval criteria for the internal document.",
+      "stage_guidance": "use ASK_SLOT to collect comm_type, email_time_range, email_keywords, email_senders, and docs_keywords. If a value provided by the user through ASK_SLOT does not satisfy the requirements of the corresponding slot, use ASK_CLARIFY to ask the user for a corrected or more appropriate value. This includes cases where the provided value has an invalid type or format, falls outside the allowed value range, is incomplete, or cannot be interpreted as a valid value for the slot. Do not use ASK_CLARIFY to confirm, verify, or approve an already valid value. Keep the collected criteria coherent because they determine the scope and source material for the document.",
+      "transition": {
+        "to_retrieve_evidence": {
+          "target_stage_name": "retrieve_evidence",
+          "activate_condition": {
+            "all_of": [
+              "input.slots.comm_type != null",
+              "input.slots.email_time_range != null",
+              "input.slots.email_keywords != []",
+              "input.slots.email_senders != []",
+              "input.slots.docs_keywords != []"
+            ]
+          }
+        }
+      },
+      "is_initial_stage": true,
+      "termination": null
+    },
+    "retrieve_evidence": {
+      "stage_name": "retrieve_evidence",
+      "stage_goal": "Gather the Gmail and Google Docs evidence required to ground the requested internal communication.",
+      "stage_guidance": "Use SEARCH_GMAIL with email_time_range, email_keywords, and email_senders to populate email_evidence, and use SEARCH_GOOGLE_DOCS with docs_keywords to populate docs_evidence. If the retrieval criteria need correction or search results reveal an insufficient scope, use ASK_CLARIFY and return to collecting the affected requirements before retrieving fresh evidence.",
+      "transition": {
+        "to_generate_document": {
+          "target_stage_name": "generate_document",
+          "activate_condition": {
+            "all_of": [
+              "input.slots.email_evidence != []",
+              "input.slots.docs_evidence != []",
+              "input.slots.comm_type != null",
+              "input.slots.email_time_range != null"
+            ]
+          }
+        }
+      },
+      "is_initial_stage": false,
+      "termination": null
+    },
+    "generate_document": {
+      "stage_name": "generate_document",
+      "stage_goal": "Create a grounded newsletter or executive brief from the collected evidence and requested coverage period.",
+      "stage_guidance": "Use GENERATE_NEWSLETTER with email_evidence, docs_evidence, email_time_range, and comm_type to produce newsletter_draft. Ensure the draft reflects the selected communication type and is grounded in both evidence sources. If required inputs or evidence are no longer adequate, clarify the issue and return to the appropriate earlier stage.",
+      "transition": {
+        "to_present_draft": {
+          "target_stage_name": "present_draft",
+          "activate_condition": {
+            "all_of": [
+              "input.slots.newsletter_draft != null",
+              "input.slots.comm_type != null",
+              "input.slots.email_time_range != null",
+              "input.slots.email_evidence != []",
+              "input.slots.docs_evidence != []"
+            ]
+          }
+        },
+        "to_revise": {
+          "target_stage_name": "revise",
+          "activate_condition": "contains(input.policy_feedback, \"DENY\")"
+        }
+      },
+      "is_initial_stage": false,
+      "termination": null
+    },
+    "present_draft": {
+      "stage_name": "present_draft",
+      "stage_goal": "Deliver the completed internal communication draft to the user.",
+      "stage_guidance": "Use PRESENT_RESULT to show newsletter_draft to the user. Treat the draft as the task artifact and clarify any substantive feedback that requires revised requirements, evidence retrieval, or a regenerated document.",
+      "termination": {
+        "activate_condition": {
+          "all_of": [
+            "input.slots.newsletter_draft != null",
+            "input.slot_states.newsletter_draft.presented == true",
+            "contains(input.policy_feedback, \"ALLOW\")"
+          ]
+        }
+      },
+      "is_initial_stage": false,
+      "transition": null
+    },
+    "revise": {
+      "stage_name": "revise",
+      "stage_goal": "Revise the presented newsletter_draft when policy feedback requires another version.",
+      "stage_guidance": "f policy feedback exists, use REVISE_NEWSLETTER with newsletter_draft and policy_feedback to update newsletter_draft. After revision, return to present_draft so the revised draft can be shown again.",
+      "transition": {
+        "to_present_draft": {
+          "target_stage_name": "present_draft",
+          "activate_condition": "input.slot_states.newsletter_draft.revised == true"
+        }
+      },
+      "is_initial_stage": false,
+      "termination": null
+    }
+  },
+  "actions": {
+    "ASK_SLOT": {
+      "name": "ASK_SLOT",
+      "description": "Ask the human user to provide the value of a task-relevant slot.",
+      "executor": "console",
+      "activate_condition": {
+        "all_of": [
+          "input.current_stage == \"collect_requirements\"",
+          {
+            "any_of": [
+              "input.slots.comm_type == null",
+              "input.slots.email_time_range == null",
+              "input.slots.email_keywords == []",
+              "input.slots.email_senders == []",
+              "input.slots.docs_keywords == []"
+            ]
+          }
+        ]
+      },
+      "parameters": {
+        "slot_name": {
+          "parameter_name": "slot_name",
+          "parameter_description": "The slot whose value should be requested from the user.",
+          "required": true,
+          "parameter_type": "string"
+        }
+      },
+      "execution_core": "ask_slot"
+    },
+    "PRESENT_RESULT": {
+      "name": "PRESENT_RESULT",
+      "description": "Present a result, message, draft, artifact, or final output to the human user.",
+      "executor": "console",
+      "activate_condition": {
+        "all_of": [
+          "input.current_stage == \"present_draft\"",
+          "input.slots.newsletter_draft != null",
+          "input.slot_states.newsletter_draft.presented == false"
+        ]
+      },
+      "parameters": {
+        "content": {
+          "parameter_name": "content",
+          "parameter_description": "The content to present to the user. Type: string.",
+          "required": true,
+          "parameter_type": "string"
+        }
+      },
+      "execution_core": "present_result"
+    },
+    "SEARCH_GMAIL": {
+      "name": "SEARCH_GMAIL",
+      "description": "Retrieve relevant Gmail evidence for the internal communication using the selected date range, keyword filters, and priority sender addresses.",
+      "executor": "search_gmail",
+      "activate_condition": {
+        "all_of": [
+          "input.current_stage == \"retrieve_evidence\"",
+          "input.slots.comm_type != null",
+          "input.slots.email_time_range != null",
+          "input.slots.email_keywords != []",
+          "input.slots.email_senders != []",
+          "input.slots.email_evidence == []"
+        ]
+      },
+      "parameters": {
+        "date_range": {
+          "parameter_name": "date_range",
+          "parameter_description": "The Gmail retrieval time range from the formal Controller state variable email_time_range. Type: reference.",
+          "required": true,
+          "parameter_type": "string"
+        },
+        "keywords": {
+          "parameter_name": "keywords",
+          "parameter_description": "The list of Gmail subject and body search keywords from the formal Controller state variable email_keywords. Type: reference.",
+          "required": true,
+          "parameter_type": "list"
+        },
+        "sender": {
+          "parameter_name": "sender",
+          "parameter_description": "The list of priority sender email addresses from the formal Controller state variable email_senders. Type: reference.",
+          "required": true,
+          "parameter_type": "list"
+        }
+      },
+      "execution_core": "SEARCH_GMAIL"
+    },
+    "SEARCH_GOOGLE_DOCS": {
+      "name": "SEARCH_GOOGLE_DOCS",
+      "description": "Retrieve relevant Google Docs evidence by searching document titles and content with the selected keywords for use in the internal communication.",
+      "executor": "search_google_docs",
+      "activate_condition": {
+        "all_of": [
+          "input.current_stage == \"retrieve_evidence\"",
+          "input.slots.comm_type != null",
+          "input.slots.docs_keywords != []",
+          "input.slots.docs_evidence == []"
+        ]
+      },
+      "parameters": {
+        "keywords": {
+          "parameter_name": "keywords",
+          "parameter_description": "The list of Google Docs search keywords from the formal Controller state variable docs_keywords. Type: reference.",
+          "required": true,
+          "parameter_type": "list"
+        }
+      },
+      "execution_core": "search_google_docs"
+    },
+    "GENERATE_NEWSLETTER": {
+      "name": "GENERATE_NEWSLETTER",
+      "description": "Generate a grounded internal newsletter or executive brief from the retrieved Gmail and Google Docs evidence for the selected coverage period and communication type.",
+      "executor": "generate_newsletter",
+      "activate_condition": {
+        "all_of": [
+          "input.current_stage == \"generate_document\"",
+          "input.slots.comm_type != null",
+          "input.slots.email_time_range != null",
+          "input.slots.email_evidence != []",
+          "input.slots.docs_evidence != []",
+          "input.slots.newsletter_draft == null"
+        ]
+      },
+      "parameters": {
+        "email_evidence": {
+          "parameter_name": "email_evidence",
+          "parameter_description": "The retrieved Gmail evidence from the formal Controller state variable email_evidence. Type: reference.",
+          "required": true,
+          "parameter_type": "list"
+        },
+        "docs_evidence": {
+          "parameter_name": "docs_evidence",
+          "parameter_description": "The retrieved Google Docs evidence from the formal Controller state variable docs_evidence. Type: reference.",
+          "required": true,
+          "parameter_type": "list"
+        },
+        "email_time_range": {
+          "parameter_name": "email_time_range",
+          "parameter_description": "The coverage period for the internal communication from the formal Controller state variable email_time_range. Type: reference.",
+          "required": true,
+          "parameter_type": "string"
+        },
+        "comm_type": {
+          "parameter_name": "comm_type",
+          "parameter_description": "The user-selected internal communication type, newsletter or exec_brief, from the formal Controller state variable comm_type. Type: reference.",
+          "required": true,
+          "parameter_type": "string"
+        }
+      },
+      "execution_core": "generate_newsletter"
+    },
+    "REVISE_NEWSLETTER": {
+      "name": "REVISE_NEWSLETTER",
+      "description": "Revise newsletter_draft using policy feedback or the user's requested changes and the retrieved evidence. Write the result back to newsletter_draft.",
+      "executor": "revise_newsletter",
+      "activate_condition": {
+        "all_of": [
+          "input.current_stage == \"revise\"",
+          "input.slots.newsletter_draft != null",
+          "contains(input.policy_feedback, \"DENY\")"
+        ]
+      },
+      "parameters": {
+        "newsletter_draft": {
+          "parameter_name": "newsletter_draft",
+          "parameter_description": "The current newsletter draft, sourced from newsletter_draft.",
+          "required": true,
+          "parameter_type": "string"
+        },
+        "policy_feedback": {
+          "parameter_name": "policy_feedback",
+          "parameter_description": "The revision instruction, sourced from policy feedback or the latest console user input.",
+          "required": true,
+          "parameter_type": "string"
+        }
+      },
+      "execution_core": "revise_newsletter"
+    }
+  }
+}

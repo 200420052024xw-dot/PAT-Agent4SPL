@@ -1,0 +1,20 @@
+{
+  "source": "F:\\PAT-Agent-master\\inputs\\pat_capability_05_liveness.csp",
+  "status": "MISMATCH",
+  "counts": {
+    "total": 1,
+    "valid": 0,
+    "invalid": 1,
+    "unknown": 0
+  },
+  "refinement_enabled": false,
+  "refinement_model": null,
+  "rounds": [
+    {
+      "round": 0,
+      "status": "MISMATCH"
+    }
+  ],
+  "stop_reason": "REFINEMENT_DISABLED",
+  "final_file": "final.csp"
+}

@@ -1,0 +1,24 @@
+{
+  "source": "F:\\PAT-Agent-master\\inputs\\keyless_car_engine_faulty.csp",
+  "status": "PASSED",
+  "counts": {
+    "total": 2,
+    "valid": 2,
+    "invalid": 0,
+    "unknown": 0
+  },
+  "refinement_enabled": true,
+  "refinement_model": "deepseek-flash",
+  "rounds": [
+    {
+      "round": 0,
+      "status": "MISMATCH"
+    },
+    {
+      "round": 1,
+      "status": "PASSED"
+    }
+  ],
+  "stop_reason": "ALL_ASSERTIONS_VALID",
+  "final_file": "final.csp"
+}

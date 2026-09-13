@@ -1,0 +1,17 @@
+var fuel = 1;
+
+Engine() =
+    [fuel > 0] drive{
+        fuel = 0;
+    } -> Engine()
+    []
+    [fuel == 0] wait -> Engine()
+    []
+    [fuel == 0] refuel{
+        fuel = 1;
+    } -> Engine();
+
+#define outOfFuel (fuel == 0);
+#define hasFuel (fuel > 0);
+
+#assert Engine |= [] (outOfFuel -> <> hasFuel);

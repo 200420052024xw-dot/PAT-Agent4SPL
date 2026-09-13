@@ -1,0 +1,59 @@
+{
+  "status": "PASSED",
+  "elapsed_seconds": 0.844127,
+  "counts": {
+    "total": 2,
+    "valid": 2,
+    "invalid": 0,
+    "unknown": 0
+  },
+  "assertions": [
+    {
+      "index": 1,
+      "assertion": "#assert EngineSystem deadlockfree;",
+      "expected": "VALID",
+      "actual": "VALID",
+      "matches_expected": true,
+      "trace": null,
+      "verification_text": "The Assertion (EngineSystem() deadlockfree) is VALID.",
+      "elapsed_seconds": 0.406126,
+      "command": [
+        "F:\\PAT-Agent-master\\PAT.Console\\Process-Analysis-Toolkit\\PAT3.Console.exe",
+        "-csp",
+        "-engine",
+        "1",
+        "F:\\PAT-Agent-master\\results\\0910-1624-001\\001-keyless_car_engine_faulty\\round_001\\assertion_001.csp",
+        "F:\\PAT-Agent-master\\results\\0910-1624-001\\001-keyless_car_engine_faulty\\round_001\\pat_output_001.txt"
+      ],
+      "return_code": 0,
+      "stdout": "PAT finished successfully.\n",
+      "stderr": "",
+      "input_file": "assertion_001.csp",
+      "output_file": "pat_output_001.txt",
+      "error": null
+    },
+    {
+      "index": 2,
+      "assertion": "#assert EngineSystem |= [] !drivewithoutfuel;",
+      "expected": "VALID",
+      "actual": "VALID",
+      "matches_expected": true,
+      "trace": null,
+      "verification_text": "The Assertion (EngineSystem() |= []! drivewithoutfuel) is VALID.",
+      "elapsed_seconds": 0.433459,
+      "command": [
+        "F:\\PAT-Agent-master\\PAT.Console\\Process-Analysis-Toolkit\\PAT3.Console.exe",
+        "-csp",
+        "F:\\PAT-Agent-master\\results\\0910-1624-001\\001-keyless_car_engine_faulty\\round_001\\assertion_002.csp",
+        "F:\\PAT-Agent-master\\results\\0910-1624-001\\001-keyless_car_engine_faulty\\round_001\\pat_output_002.txt"
+      ],
+      "return_code": 0,
+      "stdout": "PAT finished successfully.\n",
+      "stderr": "",
+      "input_file": "assertion_002.csp",
+      "output_file": "pat_output_002.txt",
+      "error": null
+    }
+  ],
+  "mismatches": []
+}

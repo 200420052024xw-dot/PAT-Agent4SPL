@@ -1,0 +1,20 @@
+=======================================================
+Assertion: EngineSystem() |= []! drivewithoutfuel
+********Verification Result********
+The Assertion (EngineSystem() |= []! drivewithoutfuel) is NOT valid.
+A counterexample is presented as follows.
+<init -> start_engine -> start_driving -> stop_driving -> drive_consume_fuel_from_full -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_75 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_50 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_25 -> start_engine -> start_driving>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:22
+Total Transitions:61
+Time Used:0.0195996s
+Estimated Memory Used:8683.688KB
+
+

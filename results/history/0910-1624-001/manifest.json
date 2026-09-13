@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "run_id": "0910-1624-001",
+  "started_at": "2026-09-10T16:24:11+08:00",
+  "finished_at": "2026-09-10T16:24:29+08:00",
+  "elapsed_seconds": 17.916046,
+  "pat_executable": "F:\\PAT-Agent-master\\PAT.Console\\Process-Analysis-Toolkit\\PAT3.Console.exe",
+  "refinement": {
+    "enabled": true,
+    "max_rounds": 3,
+    "llm": {
+      "base_url": "https://api.deepseek.com",
+      "model_id": "deepseek-flash"
+    }
+  },
+  "summary": {
+    "models": 1,
+    "passed": 1,
+    "unrepaired": 0,
+    "errors": 0,
+    "assertions": 2,
+    "valid": 2,
+    "invalid": 0,
+    "unknown": 0
+  },
+  "models": [
+    {
+      "source": "F:\\PAT-Agent-master\\inputs\\keyless_car_engine_faulty.csp",
+      "status": "PASSED",
+      "counts": {
+        "total": 2,
+        "valid": 2,
+        "invalid": 0,
+        "unknown": 0
+      },
+      "refinement_enabled": true,
+      "refinement_model": "deepseek-flash",
+      "rounds": [
+        {
+          "round": 0,
+          "status": "MISMATCH"
+        },
+        {
+          "round": 1,
+          "status": "PASSED"
+        }
+      ],
+      "stop_reason": "ALL_ASSERTIONS_VALID",
+      "final_file": "final.csp"
+    }
+  ]
+}

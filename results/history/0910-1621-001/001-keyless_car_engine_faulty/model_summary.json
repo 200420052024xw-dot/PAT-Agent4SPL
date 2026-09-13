@@ -1,0 +1,25 @@
+{
+  "source": "F:\\PAT-Agent-master\\inputs\\keyless_car_engine_faulty.csp",
+  "status": "MISMATCH",
+  "counts": {
+    "total": 2,
+    "valid": 1,
+    "invalid": 1,
+    "unknown": 0
+  },
+  "refinement_enabled": true,
+  "refinement_model": "deepseek-flash",
+  "rounds": [
+    {
+      "round": 0,
+      "status": "MISMATCH"
+    },
+    {
+      "round": 1,
+      "status": "AGENT_ERROR",
+      "error": "OpenAI-compatible request failed: Connection error."
+    }
+  ],
+  "stop_reason": "REFINEMENT_AGENT_ERROR",
+  "final_file": "final.csp"
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert EngineSystem |= [] !drivewithoutfuel;",
+    "trace": "<init -> start_engine -> start_driving -> stop_driving -> drive_consume_fuel_from_full -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_75 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_50 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_25 -> start_engine -> start_driving>",
+    "current_result": "INVALID",
+    "desired_result": "VALID",
+    "verification_text": "The Assertion (EngineSystem() |= []! drivewithoutfuel) is NOT valid.\nA counterexample is presented as follows.\n<init -> start_engine -> start_driving -> stop_driving -> drive_consume_fuel_from_full -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_75 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_50 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_25 -> start_engine -> start_driving>"
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert Engine deadlockfree;",
+    "trace": "<init -> drive>",
+    "current_result": "INVALID",
+    "desired_result": "VALID",
+    "verification_text": "The Assertion (Engine() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> drive>"
+  }
+]

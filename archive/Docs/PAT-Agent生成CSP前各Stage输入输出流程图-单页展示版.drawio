@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="draw.io" version="26.0.0">
+  <diagram id="page0" name="PAT-Agent完整流程-清晰版">
+    <mxGraphModel dx="1600" dy="1525" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3200" pageHeight="3050" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="PAT-Agent：从建模规划到 PAT 检测与迭代修复" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=50;fontStyle=1;fontColor=#19334F;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="55" y="25" width="3090" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="单页汇报版｜不展示原始任务全文和最终代码全文｜紫色框为 LLM 调用，均明确标注输入与输出" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=29;fontColor=#55677E;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="55" y="100" width="3090" height="58" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="band1" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=5;fillColor=#F7F9FC;strokeColor=#B9C5D3;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="180" width="3120" height="890" as="geometry"/>
+        </mxCell>
+        <mxCell id="band1title" value="阶段一｜任务解析与建模规划" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=35;fontStyle=1;fontColor=#19334F;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="70" y="195" width="800" height="52" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="n1" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;01 · Stage 0｜加载与初始化&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;取得当前模型，初始化规划模型和代码模型；保留系统描述、组合方式、断言及期望结果。&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;当前任务上下文&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="90" y="270" width="560" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="n2" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;02 · Stage 1｜LLM 1：识别数据&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;&lt;b&gt;输入：&lt;/b&gt;子系统名称与描述、子系统数量、进程组合方式&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;常量、变量、初始值和可选值的结构化清单&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EEF2FF;strokeColor=#6574C4;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="690" y="270" width="740" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="n3" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;03 · 整理数据结果&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;读取 LLM 1 的回复并整理成后续步骤可直接使用的数据对象，同时保留原始说明。&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;数据对象&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="1470" y="270" width="580" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="n4" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;04 · Stage 2｜LLM 2：识别动作&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;&lt;b&gt;输入：&lt;/b&gt;系统行为描述 + 已识别的常量和变量&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;各动作的触发条件、事件名称和执行后的状态变化&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EEF2FF;strokeColor=#6574C4;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="2090" y="270" width="1020" height="280" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="n5" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;05 · Stage 3｜准备后续材料&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;整理动作结果，并取得待检测断言及其期望结果。&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;动作说明 + 检查要求&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="90" y="670" width="650" height="290" as="geometry"/>
+        </mxCell>
+        <mxCell id="n6" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;06 · Stage 4.1｜LLM 3：生成数据注释&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;&lt;b&gt;输入：&lt;/b&gt;常量、变量和初始值清单&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;供 CSP# 生成使用的自然语言数据定义&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EEF2FF;strokeColor=#6574C4;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="780" y="670" width="720" height="290" as="geometry"/>
+        </mxCell>
+        <mxCell id="n7" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;07 · Stage 4.2｜LLM 4：生成动作注释&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;&lt;b&gt;输入：&lt;/b&gt;动作、条件和状态变化清单&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;逐项描述动作语义的自然语言说明&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EEF2FF;strokeColor=#6574C4;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="670" width="720" height="290" as="geometry"/>
+        </mxCell>
+        <mxCell id="n8" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;08 · 补充系统与检查说明&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;根据模型名称、组合方式和断言类型，形成整体系统、状态谓词及检查目标的文字说明。&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;系统说明 + 断言说明&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="2300" y="670" width="810" height="290" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="band2" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=5;fillColor=#F7F9FC;strokeColor=#B9C5D3;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1110" width="3120" height="440" as="geometry"/>
+        </mxCell>
+        <mxCell id="band2title" value="阶段二｜生成 CSP# 候选模型" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=35;fontStyle=1;fontColor=#19334F;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1125" width="800" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="n9" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;09 · 合并建模计划&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;按照“数据 → 动作 → 系统与检查目标”的顺序，合并成完整的自然语言建模计划。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1200" width="650" height="270" as="geometry"/>
+        </mxCell>
+        <mxCell id="n10" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;10 · 检索知识并组装请求&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;检索相似的已知模型，读取 CSP# 通用规则和语法提示，再与系统描述、建模计划组合。&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;完整生成提示&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="780" y="1200" width="750" height="270" as="geometry"/>
+        </mxCell>
+        <mxCell id="n11" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;11 · Stage 5.4｜LLM 5：生成 CSP#&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;&lt;b&gt;输入：&lt;/b&gt;系统描述 + 建模计划 + 语法提示 + 相似参考示例&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;包含候选 CSP# 的模型回复&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EEF2FF;strokeColor=#6574C4;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="1570" y="1200" width="1050" height="270" as="geometry"/>
+        </mxCell>
+        <mxCell id="n12" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;12 · 提取候选模型&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;从回复中提取主要代码块，保存原始回复和待检测候选。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="2660" y="1200" width="450" height="270" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="band3" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=5;fillColor=#FFF9F1;strokeColor=#D7B584;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1590" width="3120" height="440" as="geometry"/>
+        </mxCell>
+        <mxCell id="band3title" value="阶段三｜PAT 初次检测" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=35;fontStyle=1;fontColor=#6D4925;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1605" width="650" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="n13" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;13 · 逐条运行 PAT&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;把公共模型分别与每条断言组合并运行 PAT；记录实际 Valid / Invalid、运行日志和反例轨迹。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFF1E6;strokeColor=#D48B47;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1690" width="720" height="270" as="geometry"/>
+        </mxCell>
+        <mxCell id="d1" value="PAT 是否正常返回？" style="rhombus;whiteSpace=wrap;html=0;fillColor=#FFF8D9;strokeColor=#C59B2B;strokeWidth=3;fontSize=28;fontStyle=1;fontColor=#5B4818;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="870" y="1670" width="390" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="n14" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;14 · 比较检测结果&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;将每条断言的 PAT 实际结果与任务中的期望结果比较，整理不一致的断言。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFF1E6;strokeColor=#D48B47;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="1320" y="1690" width="720" height="270" as="geometry"/>
+        </mxCell>
+        <mxCell id="d2" value="全部断言符合期望？" style="rhombus;whiteSpace=wrap;html=0;fillColor=#FFF8D9;strokeColor=#C59B2B;strokeWidth=3;fontSize=28;fontStyle=1;fontColor=#5B4818;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="2100" y="1670" width="390" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="end" value="&lt;div style=&quot;font-size:35px&quot;&gt;&lt;b&gt;检测通过&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;记录通过状态，结束流程。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=18;fillColor=#E4F6EA;strokeColor=#2D9B57;strokeWidth=3.5;align=center;verticalAlign=middle;spacing=18;fontColor=#1E5F38;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="2550" y="1690" width="560" height="270" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="band4" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=5;fillColor=#F7F5FF;strokeColor=#B5A9D7;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="2070" width="3120" height="820" as="geometry"/>
+        </mxCell>
+        <mxCell id="band4title" value="阶段四｜PAT 反例驱动的检测—修复闭环" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=35;fontStyle=1;fontColor=#493A77;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="70" y="2085" width="900" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="n15" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;15 · 整理失败证据&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;保存失败断言、实际结果、期望结果和 PAT 反例轨迹，并转成可读的修复建议。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFF1E6;strokeColor=#D48B47;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="90" y="2180" width="680" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="n16" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;16 · LLM 6：按反例修复模型&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;&lt;b&gt;输入：&lt;/b&gt;当前 CSP# 候选 + 失败断言 + 实际 / 期望结果 + PAT 反例轨迹 + 最小修改约束&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;包含修订后 CSP# 的模型回复；保留原断言，只修改与问题有关的模型行为&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EEF2FF;strokeColor=#6574C4;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="830" y="2180" width="1370" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="n17" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;17 · 提取修复候选&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;提取修订后的主要代码块，保存本轮原始回复和修复候选。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="2260" y="2180" width="850" height="280" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="n18" value="&lt;div style=&quot;font-size:33px&quot;&gt;&lt;b&gt;18 · PAT 复检修复候选&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;再次逐条运行 PAT，生成本轮检测结果和新的反例轨迹。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFF1E6;strokeColor=#D48B47;strokeWidth=3;align=left;verticalAlign=top;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="90" y="2540" width="700" height="270" as="geometry"/>
+        </mxCell>
+        <mxCell id="d3" value="PAT 是否正常返回？" style="rhombus;whiteSpace=wrap;html=0;fillColor=#FFF8D9;strokeColor=#C59B2B;strokeWidth=3;fontSize=27;fontStyle=1;fontColor=#5B4818;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="850" y="2520" width="370" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="d4" value="全部断言符合期望？" style="rhombus;whiteSpace=wrap;html=0;fillColor=#FFF8D9;strokeColor=#C59B2B;strokeWidth=3;fontSize=27;fontStyle=1;fontColor=#5B4818;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="2520" width="370" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="d5" value="仍不匹配，并且已完成 5 轮修复？" style="rhombus;whiteSpace=wrap;html=0;fillColor=#FFF8D9;strokeColor=#C59B2B;strokeWidth=3;fontSize=26;fontStyle=1;fontColor=#5B4818;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;spacing=14;" vertex="1" parent="1">
+          <mxGeometry x="1710" y="2520" width="370" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="stop" value="&lt;div style=&quot;font-size:35px&quot;&gt;&lt;b&gt;达到修复上限&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:27px;line-height:1.42;margin-top:15px&quot;&gt;停止迭代，记录剩余问题、最终状态和各轮日志。&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=18;fillColor=#FCE8E8;strokeColor=#C65A5A;strokeWidth=3.5;align=center;verticalAlign=middle;spacing=18;fontColor=#7D2929;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="2140" y="2540" width="970" height="270" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="foot" value="图例：紫色 = LLM 调用；绿色 = 程序自动整理；橙色 = PAT 检测与结果处理。初始 CSP# 最多生成 3 次；每轮修复候选出现语法或空结果时最多重试 3 次；逻辑修复最多 5 轮。" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=26;fontColor=#55677E;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+          <mxGeometry x="55" y="2920" width="3090" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n1" target="n2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n2" target="n3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n3" target="n4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n4" target="n5">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2600" y="610"/><mxPoint x="415" y="610"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n5" target="n6"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n6" target="n7"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n7" target="n8"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;exitX=0.5;exitY=1;entryX=1;entryY=0.5;" edge="1" parent="1" source="n8" target="n9">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2705" y="1090"/><mxPoint x="760" y="1090"/><mxPoint x="760" y="1335"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n9" target="n10"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n10" target="n11"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n11" target="n12"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;exitX=0.5;exitY=1;entryX=1;entryY=0.5;" edge="1" parent="1" source="n12" target="n13">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2885" y="1570"/><mxPoint x="830" y="1570"/><mxPoint x="830" y="1825"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n13" target="d1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e14" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d1" target="n14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e15" value="否：语法 / 空结果，重调 LLM 5（最多 3 次）" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#C47B35;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="d1" target="n11">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1065" y="1570"/><mxPoint x="2095" y="1570"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n14" target="d2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e17" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#2D9B57;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d2" target="end"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e18" value="否：进入修复" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#C65A5A;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=1;entryY=0.5;" edge="1" parent="1" source="d2" target="n15">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2295" y="2050"/><mxPoint x="800" y="2050"/><mxPoint x="800" y="2320"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n15" target="n16"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n16" target="n17"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;exitX=0.5;exitY=1;entryX=1;entryY=0.5;" edge="1" parent="1" source="n17" target="n18">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2685" y="2495"/><mxPoint x="810" y="2495"/><mxPoint x="810" y="2675"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e22" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" edge="1" parent="1" source="n18" target="d3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e23" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d3" target="d4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e24" value="否：本轮重调 LLM 6（最多 3 次）" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#C47B35;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=1;entryY=0.5;" edge="1" parent="1" source="d3" target="n16">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1035" y="2870"/><mxPoint x="3140" y="2870"/><mxPoint x="3140" y="2320"/><mxPoint x="2220" y="2320"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e25" value="是：修复完成" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#2D9B57;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="d4" target="end">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1465" y="2050"/><mxPoint x="2830" y="2050"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e26" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#C65A5A;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d4" target="d5"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e27" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#C65A5A;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d5" target="stop"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e28" value="否：更新反例，开始下一轮" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#C65A5A;fontSize=24;fontStyle=1;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="d5" target="n15">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1895" y="2870"/><mxPoint x="60" y="2870"/><mxPoint x="60" y="2320"/></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

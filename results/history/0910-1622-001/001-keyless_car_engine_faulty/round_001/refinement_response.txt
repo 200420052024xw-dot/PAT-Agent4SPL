@@ -1,0 +1,20 @@
+```csp
+// Adapted from the motor subsystem of the old keyless_car dataset.
+// start_engine checks that fuel is available before starting the engine.
+
+#define FUEL_LEVEL_0 0;
+#define FUEL_LEVEL_25 25;
+#define FUEL_LEVEL_50 50;
+#define FUEL_LEVEL_75 75;
+#define FUEL_LEVEL_100 100;
+
+var fuelLevel = FUEL_LEVEL_100;
+var engineOn = 0;
+var isMoving = 0;
+
+motor() =
+    [fuelLevel == FUEL_LEVEL_100 && engineOn == 1]
+        drive_consume_fuel_from_full{
+            fuelLevel = FUEL_LEVEL_75;
+            isMoving = 1;
+        } ->

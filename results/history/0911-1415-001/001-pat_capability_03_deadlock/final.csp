@@ -1,0 +1,8 @@
+var fuel = 1;
+
+Engine() =
+    [fuel > 0] drive{
+        fuel = 0;
+    } -> Engine();
+
+#assert Engine deadlockfree;

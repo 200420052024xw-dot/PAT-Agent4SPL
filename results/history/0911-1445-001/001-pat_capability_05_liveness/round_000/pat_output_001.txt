@@ -1,0 +1,19 @@
+=======================================================
+Assertion: Engine() |= []( outOfFuel-><> hasFuel)
+********Verification Result********
+The Assertion (Engine() |= []( outOfFuel-><> hasFuel)) is NOT valid.
+A counterexample is presented as follows.
+<init -> drive -> wait -> (wait)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:6
+Total Transitions:9
+Time Used:0.0198802s
+Estimated Memory Used:41277.528KB
+
+

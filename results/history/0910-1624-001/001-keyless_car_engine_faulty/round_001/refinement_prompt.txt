@@ -1,0 +1,92 @@
+You are an expert in CSP# and PAT (Process Analysis Toolkit).
+
+Repair the CSP# model using the PAT counterexamples below. Make the smallest
+relevant changes to model behavior. Preserve the intended domain behavior in
+comments and do not introduce unrelated transitions.
+
+Strict constraints:
+1. Return the complete revised CSP# model in one fenced code block.
+2. Do not add, remove, weaken, strengthen, or rewrite any #assert statement.
+3. Keep all original assertions in their original order.
+4. Do not repair a failure by changing the property being checked.
+5. Preserve required semicolons and valid CSP# syntax.
+
+Current CSP# model:
+```csp
+// Adapted from the motor subsystem of the old keyless_car dataset.
+// Intentional defect: start_engine does not check that fuel is available.
+
+#define FUEL_LEVEL_0 0;
+#define FUEL_LEVEL_25 25;
+#define FUEL_LEVEL_50 50;
+#define FUEL_LEVEL_75 75;
+#define FUEL_LEVEL_100 100;
+
+var fuelLevel = FUEL_LEVEL_100;
+var engineOn = 0;
+var isMoving = 0;
+
+motor() =
+    [fuelLevel == FUEL_LEVEL_100 && engineOn == 1]
+        drive_consume_fuel_from_full{
+            fuelLevel = FUEL_LEVEL_75;
+            isMoving = 1;
+        } -> motor()
+    []
+    [fuelLevel == FUEL_LEVEL_75 && engineOn == 1]
+        drive_consume_fuel_from_75{
+            fuelLevel = FUEL_LEVEL_50;
+            isMoving = 1;
+        } -> motor()
+    []
+    [fuelLevel == FUEL_LEVEL_50 && engineOn == 1]
+        drive_consume_fuel_from_50{
+            fuelLevel = FUEL_LEVEL_25;
+            isMoving = 1;
+        } -> motor()
+    []
+    [fuelLevel == FUEL_LEVEL_25 && engineOn == 1]
+        drive_consume_fuel_from_25{
+            fuelLevel = FUEL_LEVEL_0;
+            isMoving = 0;
+            engineOn = 0;
+        } -> motor()
+    []
+    [fuelLevel == FUEL_LEVEL_0 && engineOn == 0 && isMoving == 0]
+        refuel{
+            fuelLevel = FUEL_LEVEL_100;
+        } -> motor();
+
+engine_ops() =
+    [engineOn == 0]
+        start_engine{
+            engineOn = 1;
+        } -> engine_ops()
+    []
+    [engineOn == 1]
+        stop_engine{
+            engineOn = 0;
+            isMoving = 0;
+        } -> engine_ops()
+    []
+    [engineOn == 1]
+        start_driving{
+            isMoving = 1;
+        } -> engine_ops()
+    []
+    [isMoving == 1]
+        stop_driving{
+            isMoving = 0;
+        } -> engine_ops();
+
+EngineSystem = motor() ||| engine_ops();
+
+#define drivewithoutfuel (isMoving == 1 && fuelLevel == FUEL_LEVEL_0);
+
+#assert EngineSystem deadlockfree;
+#assert EngineSystem |= [] !drivewithoutfuel;
+
+```
+
+PAT-guided repair information:
+The model violates #assert EngineSystem |= [] !drivewithoutfuel;. Counterexample: <init -> start_engine -> start_driving -> stop_driving -> drive_consume_fuel_from_full -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_75 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_50 -> stop_driving -> start_driving -> stop_engine -> start_engine -> drive_consume_fuel_from_25 -> start_engine -> start_driving>. The last action is start_driving; first inspect whether its guard is too weak or its effect is wrong, then inspect earlier actions: init, start_engine, start_driving, stop_driving, drive_consume_fuel_from_full, stop_driving, start_driving, stop_engine, start_engine, drive_consume_fuel_from_75, stop_driving, start_driving, stop_engine, start_engine, drive_consume_fuel_from_50, stop_driving, start_driving, stop_engine, start_engine, drive_consume_fuel_from_25, start_engine.

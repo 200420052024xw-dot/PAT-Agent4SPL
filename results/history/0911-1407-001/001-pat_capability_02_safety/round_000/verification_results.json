@@ -1,0 +1,43 @@
+{
+  "status": "MISMATCH",
+  "elapsed_seconds": 0.527725,
+  "counts": {
+    "total": 1,
+    "valid": 0,
+    "invalid": 1,
+    "unknown": 0
+  },
+  "assertions": [
+    {
+      "index": 1,
+      "assertion": "#assert System |= [] !bad;",
+      "expected": "VALID",
+      "actual": "INVALID",
+      "matches_expected": false,
+      "trace": "<init -> lock>",
+      "verification_text": "The Assertion (System() |= []! bad) is NOT valid.\nA counterexample is presented as follows.\n<init -> lock>",
+      "elapsed_seconds": 0.52733,
+      "command": [
+        "F:\\PAT-Agent-master\\PAT.Console\\Process-Analysis-Toolkit\\PAT3.Console.exe",
+        "-csp",
+        "F:\\PAT-Agent-master\\results\\0911-1407-001\\001-pat_capability_02_safety\\round_000\\assertion_001.csp",
+        "F:\\PAT-Agent-master\\results\\0911-1407-001\\001-pat_capability_02_safety\\round_000\\pat_output_001.txt"
+      ],
+      "return_code": 0,
+      "stdout": "PAT finished successfully.\n",
+      "stderr": "",
+      "input_file": "assertion_001.csp",
+      "output_file": "pat_output_001.txt",
+      "error": null
+    }
+  ],
+  "mismatches": [
+    {
+      "assertion": "#assert System |= [] !bad;",
+      "trace": "<init -> lock>",
+      "current_result": "INVALID",
+      "desired_result": "VALID",
+      "verification_text": "The Assertion (System() |= []! bad) is NOT valid.\nA counterexample is presented as follows.\n<init -> lock>"
+    }
+  ]
+}
