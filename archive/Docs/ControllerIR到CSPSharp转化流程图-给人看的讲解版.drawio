@@ -1,0 +1,115 @@
+<mxfile host="Electron" modified="2026-09-15T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="human-story" name="ControllerIR 到 CSP#（讲解版）">
+    <mxGraphModel dx="3100" dy="2480" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3100" pageHeight="2480" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="bg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCFDFE;strokeColor=none;" value="" vertex="1">
+          <mxGeometry x="0" y="0" width="3100" height="2480" as="geometry" />
+        </mxCell>
+
+        <mxCell id="title" parent="1" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=48;fontStyle=1;fontColor=#19324D;fontFamily=Microsoft YaHei;" value="一份 ControllerIR，最后是怎么变成 CSP# 的？" vertex="1">
+          <mxGeometry x="110" y="55" width="2880" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="sub" parent="1" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=top;fontSize=25;fontColor=#52677D;fontFamily=Microsoft YaHei;" value="把它看成一条流水线：程序把业务描述整理成状态机；大模型只在两处帮忙补判断；最后仍由程序生成 CSP#。" vertex="1">
+          <mxGeometry x="110" y="135" width="2880" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="codeLegend" parent="1" style="rounded=1;whiteSpace=wrap;html=0;arcSize=30;fillColor=#DDF3E9;strokeColor=#22956F;strokeWidth=2;fontSize=23;fontStyle=1;fontColor=#17674F;fontFamily=Microsoft YaHei;" value="CODE（程序）" vertex="1">
+          <mxGeometry x="110" y="205" width="220" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="llmLegend" parent="1" style="rounded=1;whiteSpace=wrap;html=0;arcSize=30;fillColor=#EEE9FF;strokeColor=#7458C7;strokeWidth=2;fontSize=23;fontStyle=1;fontColor=#523A99;fontFamily=Microsoft YaHei;" value="LLM（大模型）" vertex="1">
+          <mxGeometry x="355" y="205" width="240" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="keynote" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFF8E8;strokeColor=#E0A93F;strokeWidth=2;align=left;verticalAlign=middle;spacing=18;fontColor=#5E4821;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:25px&quot;&gt;&lt;b&gt;先记住一句话：&lt;/b&gt;大模型不会直接写整份 CSP#。它只返回建议，程序检查后才会采用。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="1740" y="195" width="1250" height="72" as="geometry" />
+        </mxCell>
+
+        <mxCell id="input" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EAF2FA;strokeColor=#477BAA;strokeWidth=3;align=left;verticalAlign=middle;spacing=20;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;起点｜拿到 ControllerIR&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;里面写着：有哪些阶段、有哪些参与者、每个参与者能做什么动作、需要遵守什么规则。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="310" width="1780" height="135" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1FAF6;strokeColor=#2C9B76;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=80;spacingRight=24;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;程序先把输入读懂&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;统一中英文字段，检查内容是否齐全，确认阶段和动作没有引用不存在的东西。&lt;/div&gt;&lt;div style=&quot;font-size:22px;color:#24785E;margin-top:8px&quot;&gt;&lt;b&gt;得到：&lt;/b&gt;一份可以放心继续处理的输入数据。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="500" width="1780" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" parent="1" style="ellipse;whiteSpace=wrap;html=0;aspect=fixed;fillColor=#23966F;strokeColor=none;fontSize=31;fontStyle=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;" value="1" vertex="1">
+          <mxGeometry x="205" y="555" width="64" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1FAF6;strokeColor=#2C9B76;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=80;spacingRight=24;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;把描述整理成“状态”和“动作”&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;状态回答“系统现在是什么情况”；动作回答“接下来可能发生什么”。例如：当前处于哪个阶段、某项信息是否已收集。&lt;/div&gt;&lt;div style=&quot;font-size:22px;color:#24785E;margin-top:8px&quot;&gt;&lt;b&gt;得到：&lt;/b&gt;有限的状态清单和动作清单。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="735" width="1780" height="195" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" parent="1" style="ellipse;whiteSpace=wrap;html=0;aspect=fixed;fillColor=#23966F;strokeColor=none;fontSize=31;fontStyle=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;" value="2" vertex="1">
+          <mxGeometry x="205" y="800" width="64" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1FAF6;strokeColor=#2C9B76;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=80;spacingRight=24;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;按“谁来做”把动作分组&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;系统动作放进系统进程，用户动作放进用户进程；流程控制和策略检查也各有一个进程。&lt;/div&gt;&lt;div style=&quot;font-size:22px;color:#24785E;margin-top:8px&quot;&gt;&lt;b&gt;得到：&lt;/b&gt;几个各管一类动作的小状态机。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="985" width="1780" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" parent="1" style="ellipse;whiteSpace=wrap;html=0;aspect=fixed;fillColor=#23966F;strokeColor=none;fontSize=31;fontStyle=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;" value="3" vertex="1">
+          <mxGeometry x="205" y="1040" width="64" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1FAF6;strokeColor=#2C9B76;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=80;spacingRight=24;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;说明每个动作“何时能做，做完怎样”&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;程序把条件写成执行门槛，把明确写出的结果变成状态变化；看不准的动作效果，才去问右边的大模型。&lt;/div&gt;&lt;div style=&quot;font-size:22px;color:#24785E;margin-top:8px&quot;&gt;&lt;b&gt;得到：&lt;/b&gt;一条条完整的状态转移。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="1220" width="1780" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" parent="1" style="ellipse;whiteSpace=wrap;html=0;aspect=fixed;fillColor=#23966F;strokeColor=none;fontSize=31;fontStyle=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;" value="4" vertex="1">
+          <mxGeometry x="205" y="1285" width="64" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="llm1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#F4F0FF;strokeColor=#7458C7;strokeWidth=3;align=left;verticalAlign=top;spacing=20;fontColor=#2E2850;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:27px;color:#5C42A9&quot;&gt;&lt;b&gt;第一次问大模型：这个动作会带来什么变化？&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:22px;line-height:1.45;margin-top:12px&quot;&gt;&lt;b&gt;程序给它：&lt;/b&gt;动作是什么、在哪个阶段发生、哪些状态允许修改、每个状态能取什么值。&lt;br&gt;&lt;br&gt;&lt;b&gt;大模型回答：&lt;/b&gt;“这个动作之后，哪些状态应该改成什么值。”&lt;br&gt;&lt;br&gt;&lt;b&gt;程序再做：&lt;/b&gt;检查变量和值是否合法；不合法就不用。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="2110" y="1160" width="820" height="325" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1FAF6;strokeColor=#2C9B76;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=80;spacingRight=24;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;把所有小状态机拼成一个完整系统&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;各个进程可以交替执行；程序再加入阶段推进、策略检查和结束条件。&lt;/div&gt;&lt;div style=&quot;font-size:22px;color:#24785E;margin-top:8px&quot;&gt;&lt;b&gt;得到：&lt;/b&gt;整个系统的状态机，也就是基础 CSP_IR。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="1480" width="1780" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" parent="1" style="ellipse;whiteSpace=wrap;html=0;aspect=fixed;fillColor=#23966F;strokeColor=none;fontSize=31;fontStyle=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;" value="5" vertex="1">
+          <mxGeometry x="205" y="1540" width="64" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1FAF6;strokeColor=#2C9B76;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=80;spacingRight=24;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;确定这个系统要检查什么&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;程序先放入固定检查项；再把完整状态机交给大模型，请它建议还有哪些情况值得验证。&lt;/div&gt;&lt;div style=&quot;font-size:22px;color:#24785E;margin-top:8px&quot;&gt;&lt;b&gt;得到：&lt;/b&gt;最终的状态条件和 PAT 断言。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="1730" width="1780" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" parent="1" style="ellipse;whiteSpace=wrap;html=0;aspect=fixed;fillColor=#23966F;strokeColor=none;fontSize=31;fontStyle=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;" value="6" vertex="1">
+          <mxGeometry x="205" y="1790" width="64" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="llm2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#F4F0FF;strokeColor=#7458C7;strokeWidth=3;align=left;verticalAlign=top;spacing=20;fontColor=#2E2850;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:27px;color:#5C42A9&quot;&gt;&lt;b&gt;第二次问大模型：还应该检查哪些情况？&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:22px;line-height:1.45;margin-top:12px&quot;&gt;&lt;b&gt;程序给它：&lt;/b&gt;系统目标、必须遵守的策略、完整状态机，以及已经有的检查项。&lt;br&gt;&lt;br&gt;&lt;b&gt;大模型回答：&lt;/b&gt;建议检查哪些状态，以及对应的断言。&lt;br&gt;&lt;br&gt;&lt;b&gt;程序再做：&lt;/b&gt;检查引用和写法，合格后才加入模型。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="2110" y="1660" width="820" height="325" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1FAF6;strokeColor=#2C9B76;strokeWidth=3;align=left;verticalAlign=middle;spacingLeft=80;spacingRight=24;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;程序把状态机写成 CSP#&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;按照固定顺序写出常量、状态变量、各个进程、完整系统和断言。这里不再让大模型自由发挥。&lt;/div&gt;&lt;div style=&quot;font-size:22px;color:#24785E;margin-top:8px&quot;&gt;&lt;b&gt;得到：&lt;/b&gt;可以交给 PAT 的 CSP# 文件，例如 verifiedCode.csp。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="1980" width="1780" height="205" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" parent="1" style="ellipse;whiteSpace=wrap;html=0;aspect=fixed;fillColor=#23966F;strokeColor=none;fontSize=31;fontStyle=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;" value="7" vertex="1">
+          <mxGeometry x="205" y="2050" width="64" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="output" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=14;fillColor=#E8F2FC;strokeColor=#477BAA;strokeWidth=4;align=left;verticalAlign=middle;spacing=22;fontColor=#20364E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:31px&quot;&gt;&lt;b&gt;终点｜CSP# 文件&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:7px&quot;&gt;它是上面那个完整状态机的文本表达：每个进程能做哪些动作、动作如何改变状态、系统需要满足哪些检查。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="180" y="2240" width="1780" height="155" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pat" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFF3E8;strokeColor=#D98537;strokeWidth=3;align=left;verticalAlign=top;spacing=20;fontColor=#58391E;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:27px;color:#AD5C19&quot;&gt;&lt;b&gt;可选：再交给 PAT 检查&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:22px;line-height:1.45;margin-top:12px&quot;&gt;PAT 会沿着状态机的各种执行路线去找：&lt;br&gt;• 坏状态能不能走到？&lt;br&gt;• 期望事件最终会不会发生？&lt;br&gt;• 系统会不会卡死？&lt;br&gt;&lt;br&gt;不满足时，PAT 会给出一条具体的反例路线。&lt;/div&gt;" vertex="1">
+          <mxGeometry x="2110" y="2070" width="820" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e0" edge="1" parent="1" source="input" target="s1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=4;strokeColor=#56748F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="s1" target="s2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=4;strokeColor=#56748F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="s2" target="s3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=4;strokeColor=#56748F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="s3" target="s4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=4;strokeColor=#56748F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="s4" target="s5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=4;strokeColor=#56748F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="s5" target="s6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=4;strokeColor=#56748F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="s6" target="s7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=4;strokeColor=#56748F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="s7" target="output" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=4;strokeColor=#56748F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="call1" edge="1" parent="1" source="s4" target="llm1" value="看不准时才问" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;strokeColor=#7458C7;fontSize=20;fontColor=#5C42A9;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.35;entryX=0;entryY=0.35;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="back1" edge="1" parent="1" source="llm1" target="s4" value="返回建议" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;strokeColor=#7458C7;fontSize=20;fontColor=#5C42A9;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.75;entryX=1;entryY=0.75;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2040" y="1405" /></Array></mxGeometry></mxCell>
+        <mxCell id="call2" edge="1" parent="1" source="s6" target="llm2" value="把完整模型给它看" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;strokeColor=#7458C7;fontSize=20;fontColor=#5C42A9;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.35;entryX=0;entryY=0.35;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="back2" edge="1" parent="1" source="llm2" target="s6" value="返回检查建议" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;strokeColor=#7458C7;fontSize=20;fontColor=#5C42A9;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.75;entryX=1;entryY=0.75;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="2040" y="1900" /></Array></mxGeometry></mxCell>
+        <mxCell id="epat" edge="1" parent="1" source="output" target="pat" value="需要验证时" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=block;endFill=1;strokeWidth=3;strokeColor=#D98537;fontSize=20;fontColor=#AD5C19;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.55;entryX=0;entryY=0.7;"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

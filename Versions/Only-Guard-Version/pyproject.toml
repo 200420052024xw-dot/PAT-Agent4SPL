@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pat-agent"
+version = "0.1.0"
+description = "ControllerIR conversion, PAT verification, and CSP# repair"
+requires-python = ">=3.11"
+dependencies = [
+  "openai>=1.0",
+  "pydantic>=2.10,<3",
+  "python-dotenv>=1.0",
+]
+
+[project.scripts]
+pat-agent = "src.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "llm*"]

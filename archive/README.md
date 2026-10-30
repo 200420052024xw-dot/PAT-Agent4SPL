@@ -7,9 +7,10 @@ SPL/PAT integration work:
 - `Experiments_Demo/`: generated models, traces, and timing demonstrations.
 - `Datasets/`: the paper evaluation datasets.
 - `Automated_Pipelines/`: the original full and no-planning pipelines.
+- `Repair_Pipeline_Results/`: run records produced before the code reorganization.
 
 The original full pipeline remains at
-`Automated_Pipelines/Full_Pipeline/pipeline.py`. The active `../src/pipeline.py`
-has since been reduced to a CSP#-to-PAT verification pipeline. Archived files
-retain their original path assumptions and should be treated as
+`Automated_Pipelines/Full_Pipeline/pipeline.py`. Current commands are implemented
+under `../pat_agent/`; `../src/pipeline.py` is only a compatibility entry point.
+Archived files retain their original path assumptions and should be treated as
 reference/reproduction material.

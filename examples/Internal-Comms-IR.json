@@ -1,0 +1,1729 @@
+{
+  "description": "根据用户需求和 Gmail 邮件资料，生成或修订 3P 更新、公司 Newsletter，并交由用户审阅确认。",
+  "slot_information": {
+    "comms_type": {
+      "type": "enum",
+      "description": "文档类型；只支持 3P 更新或公司 Newsletter。",
+      "default_value": null,
+      "required": true,
+      "enum_values": [
+        "3P",
+        "Newsletter"
+      ]
+    },
+    "scope_name": {
+      "type": "string",
+      "description": "3P 的团队名称，或 Newsletter 的公司名称。",
+      "default_value": "",
+      "required": true
+    },
+    "reporting_period": {
+      "type": "string",
+      "description": "内容覆盖日期，YYYY-MM-DD/YYYY-MM-DD，含首尾日期；3P 的进展与问题使用此范围。",
+      "default_value": "",
+      "required": true
+    },
+    "planning_period": {
+      "type": "string",
+      "description": "仅 3P 必填：计划覆盖日期，YYYY-MM-DD/YYYY-MM-DD。Newsletter 不询问且忽略此值。",
+      "default_value": "",
+      "required": false
+    },
+    "senders": {
+      "type": "list",
+      "description": "Gmail 发件人姓名或邮箱；支持“姓名 <email>”；列表内为 OR。",
+      "default_value": [],
+      "required": true,
+      "element_type": "string"
+    },
+    "keywords": {
+      "type": "list",
+      "description": "Gmail 关键词；列表内为 OR，与发件人、日期条件取 AND。",
+      "default_value": [],
+      "required": true,
+      "element_type": "string"
+    },
+    "email_evidence": {
+      "type": "list",
+      "description": "Gmail 邮件正文、发件人、日期、来源链接及查询条件；每次检索替换。",
+      "default_value": [],
+      "required": false,
+      "element_type": "dict"
+    },
+    "draft": {
+      "type": "string",
+      "description": "当前完整草稿；生成、重新生成和修订均覆盖此值，之后必须展示全文再审阅。",
+      "default_value": "",
+      "required": false
+    },
+    "review_feedback": {
+      "type": "string",
+      "description": "最近一次审阅回复原文。不能将旧回复视为对新草稿的确认。",
+      "default_value": "",
+      "required": false
+    },
+    "user_material": {
+      "type": "string",
+      "description": "仅记录用户主动提供的事实材料，不是用户修改意见；禁止主动在首稿前追加询问。Gmail 不可用时可作明确披露的替代来源。",
+      "default_value": "",
+      "required": false
+    },
+    "use_user_material": {
+      "type": "boolean",
+      "description": "仅 Gmail 检索失败后，用户明确同意使用其材料时设 true；正常流程为 false。",
+      "default_value": false,
+      "required": false
+    }
+  },
+  "participants": {
+    "console": {
+      "interactive_object": "human",
+      "description": "提供需求、接收解释/澄清与完整草稿并给出反馈的用户。"
+    },
+    "gmail": {
+      "interactive_object": "traditional_system",
+      "description": "真实 Gmail REST API，只读取邮件。认证路径由 Package .env 配置。",
+      "participant_config": {
+        "mode": "gmail_api"
+      }
+    }
+  },
+  "actions": {
+    "ASK_SLOT": {
+      "description": "询问一个缺失槽位，提取其值并保留原始回复；已有有效值直接返回，不再询问。",
+      "parameters": {
+        "slot_name": {
+          "parameter_type": "string",
+          "parameter_description": "本次要收集的槽位名称。",
+          "required": true
+        },
+        "current_slots": {
+          "parameter_type": "dict",
+          "parameter_description": "当前全部 slots，包含需求、证据及当前草稿。",
+          "required": true
+        }
+      },
+      "executor": "console"
+    },
+    "PRESENT": {
+      "description": "统一展示说明、澄清问题和完整草稿。wait_for_reply=false 仅展示；true 展示后等待用户回复，返回原文。解释与澄清都使用本动作。",
+      "parameters": {
+        "content": {
+          "parameter_type": "string",
+          "parameter_description": "解释/澄清阶段由 LLM 根据原话、已有槽位、当前错误及历史补齐；不得虚构邮件。审阅阶段预配草稿全文。",
+          "required": true
+        },
+        "wait_for_reply": {
+          "parameter_type": "boolean",
+          "parameter_description": "澄清与审阅为 true；解释为 false。",
+          "required": true
+        },
+        "reply_prompt": {
+          "parameter_type": "string",
+          "required": false,
+          "parameter_description": "预配的尾部审阅提示；未预配时不补齐。"
+        }
+      },
+      "executor": "console"
+    },
+    "REVISE_SLOT": {
+      "description": "直接写入用户已经给出的一个需求值或修改，不再提问。保留未改部分；相对日期结合原值计算，列表提供完整新列表。一次只改一个，参照历史避免重复应用。成功结果必须 overwrite 到 slots.<slot_name>。",
+      "parameters": {
+        "slot_name": {
+          "parameter_type": "string",
+          "parameter_description": "待改槽位，必须与写入目标一致。",
+          "required": true,
+          "enum_values": [
+            "comms_type",
+            "scope_name",
+            "reporting_period",
+            "planning_period",
+            "senders",
+            "keywords",
+            "user_material",
+            "use_user_material"
+          ]
+        },
+        "revised_value": {
+          "parameter_type": "any",
+          "parameter_description": "按槽位规格给出完整新值；日期规范 YYYY-MM-DD/YYYY-MM-DD。use_user_material 只有检索失败且用户明确选择替代材料时才能 true。",
+          "required": true
+        }
+      },
+      "executor": "internal_executor"
+    },
+    "RESET_VALUE": {
+      "description": "在 IR 指定位置清空旧证据或旧反馈，避免过期内容被复用。",
+      "parameters": {
+        "value": {
+          "parameter_type": "any",
+          "parameter_description": "待写入的清空值。",
+          "required": true
+        }
+      },
+      "executor": "internal_executor"
+    },
+    "RETRIEVE_EMAILS": {
+      "description": "调用 Gmail messages.list + messages.get(full)，按已收集的需求检索、分页、读取 MIME 正文。3P 查询报告期及计划期；Newsletter 只查报告期。不发送、删除或更改邮件。失败或无结果保留错误，不继续生成，不用 mock 或测试脚本填充。",
+      "parameters": {
+        "requirements": {
+          "parameter_type": "dict",
+          "parameter_description": "当前全部 slots，包含需求、证据及当前草稿。",
+          "required": true
+        }
+      },
+      "executor": "gmail"
+    },
+    "GENERATE_3P": {
+      "description": "根据需求和邮件证据生成完整 3P 草稿。",
+      "parameters": {
+        "requirements": {
+          "parameter_type": "dict",
+          "parameter_description": "当前全部 slots，包含需求、证据及当前草稿。",
+          "required": true
+        },
+        "fallback": {
+          "parameter_type": "boolean",
+          "parameter_description": "仅用户明确选择 Gmail 失败后的材料回退时为 true。",
+          "required": true
+        }
+      },
+      "executor": "internal_executor"
+    },
+    "GENERATE_NEWSLETTER": {
+      "description": "根据需求和邮件证据生成完整公司 Newsletter 草稿。",
+      "parameters": {
+        "requirements": {
+          "parameter_type": "dict",
+          "parameter_description": "当前全部 slots，包含需求、证据及当前草稿。",
+          "required": true
+        },
+        "fallback": {
+          "parameter_type": "boolean",
+          "parameter_description": "仅用户明确选择 Gmail 失败后的材料回退时为 true。",
+          "required": true
+        }
+      },
+      "executor": "internal_executor"
+    },
+    "REVISE_3P": {
+      "description": "根据用户反馈和证据修改 3P，返回完整修订稿。",
+      "parameters": {
+        "requirements": {
+          "parameter_type": "dict",
+          "parameter_description": "当前全部 slots，包含需求、证据及当前草稿。",
+          "required": true
+        },
+        "fallback": {
+          "parameter_type": "boolean",
+          "parameter_description": "仅用户明确选择 Gmail 失败后的材料回退时为 true。",
+          "required": true
+        },
+        "feedback": {
+          "parameter_type": "string",
+          "parameter_description": "本次用户修改要求。",
+          "required": true
+        }
+      },
+      "executor": "internal_executor"
+    },
+    "REVISE_NEWSLETTER": {
+      "description": "根据用户反馈和证据修改 Newsletter，返回完整修订稿。",
+      "parameters": {
+        "requirements": {
+          "parameter_type": "dict",
+          "parameter_description": "当前全部 slots，包含需求、证据及当前草稿。",
+          "required": true
+        },
+        "fallback": {
+          "parameter_type": "boolean",
+          "parameter_description": "仅用户明确选择 Gmail 失败后的材料回退时为 true。",
+          "required": true
+        },
+        "feedback": {
+          "parameter_type": "string",
+          "parameter_description": "本次用户修改要求。",
+          "required": true
+        }
+      },
+      "executor": "internal_executor"
+    }
+  },
+  "stages": {
+    "initial": {
+      "kind": "initial",
+      "description": "开始收集需求。",
+      "entry": null,
+      "doActivity": null,
+      "exit": null,
+      "transitions": [
+        {
+          "target": "collect_comms_type",
+          "description": "首先确认 3P 或 Newsletter。",
+          "guard": true
+        }
+      ]
+    },
+    "collect_comms_type": {
+      "kind": "state",
+      "description": "收集 comms_type，每次只问一项；六个收集阶段之间按缺失项选择下一项，已有有效值不重复询问。planning_period 仅 3P 需要。回复中其他明确值先通过 revise_slot 写入；全部需求齐全且无待处理的问题后进入 retrieve_emails。首稿前不追加标签、重点领域、语气、篇幅或其他偏好问题。",
+      "entry": null,
+      "doActivity": {
+        "action": "ASK_SLOT",
+        "parameters": {
+          "slot_name": "comms_type",
+          "current_slots": "@slots"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.comms_type"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "collect_scope_name",
+          "description": "继续收集尚未填写的 scope_name；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.scope_name == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_reporting_period",
+          "description": "继续收集尚未填写的 reporting_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.reporting_period == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_planning_period",
+          "description": "继续收集尚未填写的 planning_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type == \"3P\"",
+                  "input.slots.planning_period == \"\""
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_senders",
+          "description": "继续收集尚未填写的 senders；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.senders) == 0"
+            ]
+          }
+        },
+        {
+          "target": "collect_keywords",
+          "description": "继续收集尚未填写的 keywords；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.keywords) == 0"
+            ]
+          }
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "当前文档类型所需的槽位全部齐全，且没有尚待处理的修改或问题，开始检索邮件。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "revise_slot",
+          "description": "回复包含其他槽位的明确值或修改，尚未写入时先处理；已经完成的修改不得重复。",
+          "guard": true
+        },
+        {
+          "target": "explanation",
+          "description": "用户提出尚未回答的概念或用途问题。",
+          "guard": true
+        },
+        {
+          "target": "ask_clarification",
+          "description": "回复存在无法确定的歧义，或输入值不受支持。",
+          "guard": true
+        }
+      ]
+    },
+    "collect_scope_name": {
+      "kind": "state",
+      "description": "收集 scope_name，每次只问一项；六个收集阶段之间按缺失项选择下一项，已有有效值不重复询问。planning_period 仅 3P 需要。回复中其他明确值先通过 revise_slot 写入；全部需求齐全且无待处理的问题后进入 retrieve_emails。首稿前不追加标签、重点领域、语气、篇幅或其他偏好问题。",
+      "entry": null,
+      "doActivity": {
+        "action": "ASK_SLOT",
+        "parameters": {
+          "slot_name": "scope_name",
+          "current_slots": "@slots"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.scope_name"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "collect_comms_type",
+          "description": "继续收集尚未填写的 comms_type；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == null"
+            ]
+          }
+        },
+        {
+          "target": "collect_reporting_period",
+          "description": "继续收集尚未填写的 reporting_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.reporting_period == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_planning_period",
+          "description": "继续收集尚未填写的 planning_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type == \"3P\"",
+                  "input.slots.planning_period == \"\""
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_senders",
+          "description": "继续收集尚未填写的 senders；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.senders) == 0"
+            ]
+          }
+        },
+        {
+          "target": "collect_keywords",
+          "description": "继续收集尚未填写的 keywords；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.keywords) == 0"
+            ]
+          }
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "当前文档类型所需的槽位全部齐全，且没有尚待处理的修改或问题，开始检索邮件。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "revise_slot",
+          "description": "回复包含其他槽位的明确值或修改，尚未写入时先处理；已经完成的修改不得重复。",
+          "guard": true
+        },
+        {
+          "target": "explanation",
+          "description": "用户提出尚未回答的概念或用途问题。",
+          "guard": true
+        },
+        {
+          "target": "ask_clarification",
+          "description": "回复存在无法确定的歧义，或输入值不受支持。",
+          "guard": true
+        }
+      ]
+    },
+    "collect_reporting_period": {
+      "kind": "state",
+      "description": "收集 reporting_period，每次只问一项；六个收集阶段之间按缺失项选择下一项，已有有效值不重复询问。planning_period 仅 3P 需要。回复中其他明确值先通过 revise_slot 写入；全部需求齐全且无待处理的问题后进入 retrieve_emails。首稿前不追加标签、重点领域、语气、篇幅或其他偏好问题。",
+      "entry": null,
+      "doActivity": {
+        "action": "ASK_SLOT",
+        "parameters": {
+          "slot_name": "reporting_period",
+          "current_slots": "@slots"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.reporting_period"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "collect_comms_type",
+          "description": "继续收集尚未填写的 comms_type；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == null"
+            ]
+          }
+        },
+        {
+          "target": "collect_scope_name",
+          "description": "继续收集尚未填写的 scope_name；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.scope_name == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_planning_period",
+          "description": "继续收集尚未填写的 planning_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type == \"3P\"",
+                  "input.slots.planning_period == \"\""
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_senders",
+          "description": "继续收集尚未填写的 senders；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.senders) == 0"
+            ]
+          }
+        },
+        {
+          "target": "collect_keywords",
+          "description": "继续收集尚未填写的 keywords；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.keywords) == 0"
+            ]
+          }
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "当前文档类型所需的槽位全部齐全，且没有尚待处理的修改或问题，开始检索邮件。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "revise_slot",
+          "description": "回复包含其他槽位的明确值或修改，尚未写入时先处理；已经完成的修改不得重复。",
+          "guard": true
+        },
+        {
+          "target": "explanation",
+          "description": "用户提出尚未回答的概念或用途问题。",
+          "guard": true
+        },
+        {
+          "target": "ask_clarification",
+          "description": "回复存在无法确定的歧义，或输入值不受支持。",
+          "guard": true
+        }
+      ]
+    },
+    "collect_planning_period": {
+      "kind": "state",
+      "description": "收集 planning_period，每次只问一项；六个收集阶段之间按缺失项选择下一项，已有有效值不重复询问。planning_period 仅 3P 需要。回复中其他明确值先通过 revise_slot 写入；全部需求齐全且无待处理的问题后进入 retrieve_emails。首稿前不追加标签、重点领域、语气、篇幅或其他偏好问题。",
+      "entry": null,
+      "doActivity": {
+        "action": "ASK_SLOT",
+        "parameters": {
+          "slot_name": "planning_period",
+          "current_slots": "@slots"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.planning_period"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "collect_comms_type",
+          "description": "继续收集尚未填写的 comms_type；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == null"
+            ]
+          }
+        },
+        {
+          "target": "collect_scope_name",
+          "description": "继续收集尚未填写的 scope_name；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.scope_name == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_reporting_period",
+          "description": "继续收集尚未填写的 reporting_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.reporting_period == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_senders",
+          "description": "继续收集尚未填写的 senders；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.senders) == 0"
+            ]
+          }
+        },
+        {
+          "target": "collect_keywords",
+          "description": "继续收集尚未填写的 keywords；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.keywords) == 0"
+            ]
+          }
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "当前文档类型所需的槽位全部齐全，且没有尚待处理的修改或问题，开始检索邮件。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "revise_slot",
+          "description": "回复包含其他槽位的明确值或修改，尚未写入时先处理；已经完成的修改不得重复。",
+          "guard": true
+        },
+        {
+          "target": "explanation",
+          "description": "用户提出尚未回答的概念或用途问题。",
+          "guard": true
+        },
+        {
+          "target": "ask_clarification",
+          "description": "回复存在无法确定的歧义，或输入值不受支持。",
+          "guard": true
+        }
+      ]
+    },
+    "collect_senders": {
+      "kind": "state",
+      "description": "收集 senders，每次只问一项；六个收集阶段之间按缺失项选择下一项，已有有效值不重复询问。planning_period 仅 3P 需要。回复中其他明确值先通过 revise_slot 写入；全部需求齐全且无待处理的问题后进入 retrieve_emails。首稿前不追加标签、重点领域、语气、篇幅或其他偏好问题。",
+      "entry": null,
+      "doActivity": {
+        "action": "ASK_SLOT",
+        "parameters": {
+          "slot_name": "senders",
+          "current_slots": "@slots"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.senders"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "collect_comms_type",
+          "description": "继续收集尚未填写的 comms_type；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == null"
+            ]
+          }
+        },
+        {
+          "target": "collect_scope_name",
+          "description": "继续收集尚未填写的 scope_name；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.scope_name == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_reporting_period",
+          "description": "继续收集尚未填写的 reporting_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.reporting_period == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_planning_period",
+          "description": "继续收集尚未填写的 planning_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type == \"3P\"",
+                  "input.slots.planning_period == \"\""
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_keywords",
+          "description": "继续收集尚未填写的 keywords；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.keywords) == 0"
+            ]
+          }
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "当前文档类型所需的槽位全部齐全，且没有尚待处理的修改或问题，开始检索邮件。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "revise_slot",
+          "description": "回复包含其他槽位的明确值或修改，尚未写入时先处理；已经完成的修改不得重复。",
+          "guard": true
+        },
+        {
+          "target": "explanation",
+          "description": "用户提出尚未回答的概念或用途问题。",
+          "guard": true
+        },
+        {
+          "target": "ask_clarification",
+          "description": "回复存在无法确定的歧义，或输入值不受支持。",
+          "guard": true
+        }
+      ]
+    },
+    "collect_keywords": {
+      "kind": "state",
+      "description": "收集 keywords，每次只问一项；六个收集阶段之间按缺失项选择下一项，已有有效值不重复询问。planning_period 仅 3P 需要。回复中其他明确值先通过 revise_slot 写入；全部需求齐全且无待处理的问题后进入 retrieve_emails。首稿前不追加标签、重点领域、语气、篇幅或其他偏好问题。",
+      "entry": null,
+      "doActivity": {
+        "action": "ASK_SLOT",
+        "parameters": {
+          "slot_name": "keywords",
+          "current_slots": "@slots"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.keywords"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "collect_comms_type",
+          "description": "继续收集尚未填写的 comms_type；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == null"
+            ]
+          }
+        },
+        {
+          "target": "collect_scope_name",
+          "description": "继续收集尚未填写的 scope_name；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.scope_name == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_reporting_period",
+          "description": "继续收集尚未填写的 reporting_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.reporting_period == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_planning_period",
+          "description": "继续收集尚未填写的 planning_period；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type == \"3P\"",
+                  "input.slots.planning_period == \"\""
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_senders",
+          "description": "继续收集尚未填写的 senders；没有尚待处理的修改或问题时，结合用户回复选择下一项。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.senders) == 0"
+            ]
+          }
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "当前文档类型所需的槽位全部齐全，且没有尚待处理的修改或问题，开始检索邮件。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "revise_slot",
+          "description": "回复包含其他槽位的明确值或修改，尚未写入时先处理；已经完成的修改不得重复。",
+          "guard": true
+        },
+        {
+          "target": "explanation",
+          "description": "用户提出尚未回答的概念或用途问题。",
+          "guard": true
+        },
+        {
+          "target": "ask_clarification",
+          "description": "回复存在无法确定的歧义，或输入值不受支持。",
+          "guard": true
+        }
+      ]
+    },
+    "retrieve_emails": {
+      "kind": "state",
+      "description": "需求齐全后检索 Gmail，替换旧证据。成功后按文档类型直接进入生成；失败或无结果保留错误并停止本次运行。用户已明确选择使用其材料时采用该材料。",
+      "entry": {
+        "action": "RESET_VALUE",
+        "parameters": {
+          "value": []
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.email_evidence"
+        }
+      },
+      "doActivity": {
+        "action": "RETRIEVE_EMAILS",
+        "parameters": {
+          "requirements": "@slots"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.email_evidence"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "generate_3p",
+          "description": "检索成功，按当前需求生成/重新生成 3P。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == \"3P\""
+            ]
+          }
+        },
+        {
+          "target": "generate_newsletter",
+          "description": "检索成功，按当前需求生成/重新生成 Newsletter。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == \"Newsletter\""
+            ]
+          }
+        }
+      ]
+    },
+    "generate_3p": {
+      "kind": "state",
+      "description": "依据当前需求和邮件证据生成完整草稿。始终输出全文，成功后进入展示审阅，不直接完成；修改筛选需求必须重新检索。失败保留错误并停止本次运行。",
+      "entry": {
+        "action": "RESET_VALUE",
+        "parameters": {
+          "value": ""
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.review_feedback"
+        }
+      },
+      "doActivity": {
+        "action": "GENERATE_3P",
+        "parameters": {
+          "requirements": "@slots",
+          "fallback": "@slots.use_user_material"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.draft"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "present_and_review",
+          "description": "生成/修订成功，必须展示完整草稿并等待新的反馈。",
+          "guard": "input.stage_execution.doActivity.execution_status == \"success\""
+        }
+      ]
+    },
+    "generate_newsletter": {
+      "kind": "state",
+      "description": "依据当前需求和邮件证据生成完整草稿。始终输出全文，成功后进入展示审阅，不直接完成；修改筛选需求必须重新检索。失败保留错误并停止本次运行。",
+      "entry": {
+        "action": "RESET_VALUE",
+        "parameters": {
+          "value": ""
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.review_feedback"
+        }
+      },
+      "doActivity": {
+        "action": "GENERATE_NEWSLETTER",
+        "parameters": {
+          "requirements": "@slots",
+          "fallback": "@slots.use_user_material"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.draft"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "present_and_review",
+          "description": "生成/修订成功，必须展示完整草稿并等待新的反馈。",
+          "guard": "input.stage_execution.doActivity.execution_status == \"success\""
+        }
+      ]
+    },
+    "revise_3p": {
+      "kind": "state",
+      "description": "依据最新反馈修改已有草稿，沿用有效邮件证据。始终输出全文，成功后进入展示审阅，不直接完成；修改筛选需求必须重新检索。失败保留错误并停止本次运行。",
+      "entry": {
+        "action": "RESET_VALUE",
+        "parameters": {
+          "value": ""
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.review_feedback"
+        }
+      },
+      "doActivity": {
+        "action": "REVISE_3P",
+        "parameters": {
+          "requirements": "@slots",
+          "fallback": "@slots.use_user_material",
+          "feedback": "@participants_input.user"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.draft"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "present_and_review",
+          "description": "生成/修订成功，必须展示完整草稿并等待新的反馈。",
+          "guard": "input.stage_execution.doActivity.execution_status == \"success\""
+        }
+      ]
+    },
+    "revise_newsletter": {
+      "kind": "state",
+      "description": "依据最新反馈修改已有草稿，沿用有效邮件证据。始终输出全文，成功后进入展示审阅，不直接完成；修改筛选需求必须重新检索。失败保留错误并停止本次运行。",
+      "entry": {
+        "action": "RESET_VALUE",
+        "parameters": {
+          "value": ""
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.review_feedback"
+        }
+      },
+      "doActivity": {
+        "action": "REVISE_NEWSLETTER",
+        "parameters": {
+          "requirements": "@slots",
+          "fallback": "@slots.use_user_material",
+          "feedback": "@participants_input.user"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.draft"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "present_and_review",
+          "description": "生成/修订成功，必须展示完整草稿并等待新的反馈。",
+          "guard": "input.stage_execution.doActivity.execution_status == \"success\""
+        }
+      ]
+    },
+    "present_and_review": {
+      "kind": "state",
+      "description": "用 PRESENT 展示完整草稿并等待用户。明确接受当前展示版本才 completed；可执行修改必须先修订再展示。需求变更先 revise_slot，再检索重生。",
+      "entry": null,
+      "doActivity": {
+        "action": "PRESENT",
+        "parameters": {
+          "content": "@slots.draft",
+          "wait_for_reply": true,
+          "reply_prompt": "以上是完整草稿。请提出修改意见，或明确确认这版作为最终版本。"
+        },
+        "when_success_write_to": {
+          "operation": "overwrite",
+          "target": "slots.review_feedback"
+        }
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "completed",
+          "description": "用户明确接受刚刚展示的这一版，且没有同时要求修改或提问。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.draft != \"\""
+            ]
+          }
+        },
+        {
+          "target": "revise_3p",
+          "description": "用户明确提出 3P 正文修改意见，需求和检索条件不变。",
+          "guard": {
+            "all_of": [
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              },
+              {
+                "any_of": [
+                  "count(input.slots.email_evidence) > 0",
+                  {
+                    "all_of": [
+                      "input.slots.use_user_material == true",
+                      "input.slots.user_material != \"\""
+                    ]
+                  }
+                ]
+              },
+              "input.slots.draft != \"\"",
+              "input.slots.comms_type == \"3P\""
+            ]
+          }
+        },
+        {
+          "target": "revise_newsletter",
+          "description": "用户明确提出 Newsletter 正文修改意见，需求和检索条件不变。",
+          "guard": {
+            "all_of": [
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              },
+              {
+                "any_of": [
+                  "count(input.slots.email_evidence) > 0",
+                  {
+                    "all_of": [
+                      "input.slots.use_user_material == true",
+                      "input.slots.user_material != \"\""
+                    ]
+                  }
+                ]
+              },
+              "input.slots.draft != \"\"",
+              "input.slots.comms_type == \"Newsletter\""
+            ]
+          }
+        },
+        {
+          "target": "revise_slot",
+          "description": "用户明确修改需求或检索条件，先更新槽位。",
+          "guard": true
+        },
+        {
+          "target": "ask_clarification",
+          "description": "反馈含糊，无法判断接受还是修改，或修改内容存在歧义。",
+          "guard": true
+        },
+        {
+          "target": "explanation",
+          "description": "用户提出需要说明的概念、用途或草稿内容问题。",
+          "guard": true
+        }
+      ]
+    },
+    "revise_slot": {
+      "kind": "state",
+      "description": "直接写回用户已明确的一个需求值，不提问。多个值通过自循环逐一处理，参照历史避免重复。写入完成后直接转到任一缺失项的收集阶段；需求齐全则直接重新检索。",
+      "entry": null,
+      "doActivity": {
+        "action": "REVISE_SLOT",
+        "parameters": {}
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "revise_slot",
+          "description": "同一回复还有尚未应用的明确值；已完成的相对修改不得重复。",
+          "guard": "input.stage_execution.doActivity.execution_status == \"success\""
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "全部明确修改已写入且当前文档所需槽位齐全，按最新需求重新检索；不得沿用修改前的证据。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_comms_type",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 comms_type；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == null"
+            ]
+          }
+        },
+        {
+          "target": "collect_scope_name",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 scope_name；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.scope_name == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_reporting_period",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 reporting_period；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.reporting_period == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_planning_period",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 planning_period；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type == \"3P\"",
+                  "input.slots.planning_period == \"\""
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_senders",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 senders；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.senders) == 0"
+            ]
+          }
+        },
+        {
+          "target": "collect_keywords",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 keywords；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.keywords) == 0"
+            ]
+          }
+        }
+      ]
+    },
+    "ask_clarification": {
+      "kind": "state",
+      "description": "澄清使用 PRESENT：content 由 LLM 根据原话、现有需求、失败原因和历史组织一个具体问题，wait_for_reply=true。仅问真正未确定的内容；不得重复询问已明确的修改，不在首稿前追加标签、关注点、语气或长度问题。Gmail 失败时说明实际错误；用户提供材料后可 revise_slot 写入 user_material，明确选择回退后再写 use_user_material=true。",
+      "entry": null,
+      "doActivity": {
+        "action": "PRESENT",
+        "parameters": {
+          "wait_for_reply": true
+        },
+        "when_success_write_to": null
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "ask_clarification",
+          "description": "用户回复仍有未解决的歧义，针对剩余问题继续澄清；不重复已经确认的问题。",
+          "guard": "input.stage_execution.doActivity.execution_status == \"success\""
+        },
+        {
+          "target": "revise_slot",
+          "description": "回复明确给出需求值、修改值或回退材料，直接写回。",
+          "guard": true
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "澄清已完成，无待写入的需求值，需求齐全且尚需首次检索或用户明确要求重新检索。已有有效草稿且仅讨论正文时继续审阅或修订。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "revise_3p",
+          "description": "已明确对当前 3P 草稿的正文修改，需求不变。",
+          "guard": {
+            "all_of": [
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              },
+              {
+                "any_of": [
+                  "count(input.slots.email_evidence) > 0",
+                  {
+                    "all_of": [
+                      "input.slots.use_user_material == true",
+                      "input.slots.user_material != \"\""
+                    ]
+                  }
+                ]
+              },
+              "input.slots.draft != \"\"",
+              "input.slots.comms_type == \"3P\""
+            ]
+          }
+        },
+        {
+          "target": "revise_newsletter",
+          "description": "已明确对当前 Newsletter 草稿的正文修改，需求不变。",
+          "guard": {
+            "all_of": [
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              },
+              {
+                "any_of": [
+                  "count(input.slots.email_evidence) > 0",
+                  {
+                    "all_of": [
+                      "input.slots.use_user_material == true",
+                      "input.slots.user_material != \"\""
+                    ]
+                  }
+                ]
+              },
+              "input.slots.draft != \"\"",
+              "input.slots.comms_type == \"Newsletter\""
+            ]
+          }
+        },
+        {
+          "target": "present_and_review",
+          "description": "歧义已解决，无待处理的修改，重新展示当前完整稿供确认。",
+          "guard": {
+            "all_of": [
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              },
+              {
+                "any_of": [
+                  "count(input.slots.email_evidence) > 0",
+                  {
+                    "all_of": [
+                      "input.slots.use_user_material == true",
+                      "input.slots.user_material != \"\""
+                    ]
+                  }
+                ]
+              },
+              "input.slots.draft != \"\""
+            ]
+          }
+        },
+        {
+          "target": "explanation",
+          "description": "回复提出需要解释的概念或用途。",
+          "guard": true
+        },
+        {
+          "target": "collect_comms_type",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 comms_type；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == null"
+            ]
+          }
+        },
+        {
+          "target": "collect_scope_name",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 scope_name；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.scope_name == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_reporting_period",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 reporting_period；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.reporting_period == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_planning_period",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 planning_period；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type == \"3P\"",
+                  "input.slots.planning_period == \"\""
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_senders",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 senders；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.senders) == 0"
+            ]
+          }
+        },
+        {
+          "target": "collect_keywords",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 keywords；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.keywords) == 0"
+            ]
+          }
+        }
+      ]
+    },
+    "explanation": {
+      "kind": "state",
+      "description": "用 PRESENT 回答当前概念、用途或内容问题，只展示说明，不代用户编写业务值。尚有未回答的问题时自循环继续解释，不重复已回答的内容；解释完成后直接收集缺失项，需求齐全则进入检索，已有有效草稿则继续审阅。",
+      "entry": null,
+      "doActivity": {
+        "action": "PRESENT",
+        "parameters": {
+          "wait_for_reply": false
+        },
+        "when_success_write_to": null
+      },
+      "exit": null,
+      "transitions": [
+        {
+          "target": "explanation",
+          "description": "用户原话中仍有尚未回答的概念、用途或内容问题，继续解释剩余问题；已回答完毕不得重复循环。",
+          "guard": "input.stage_execution.doActivity.execution_status == \"success\""
+        },
+        {
+          "target": "revise_slot",
+          "description": "解释已完成，用户原话中还有已经明确但尚未写入的需求值或修改，先写回。",
+          "guard": "input.stage_execution.doActivity.execution_status == \"success\""
+        },
+        {
+          "target": "retrieve_emails",
+          "description": "解释已完成，无待处理的修改，当前文档所需槽位齐全且尚需首次检索或用户明确要求重新检索。已有有效草稿则继续审阅。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "present_and_review",
+          "description": "当前已有有效草稿且没有未处理的修改，解释完成后继续审阅。",
+          "guard": {
+            "all_of": [
+              {
+                "all_of": [
+                  "input.slots.comms_type != null",
+                  "input.slots.scope_name != \"\"",
+                  "input.slots.reporting_period != \"\"",
+                  {
+                    "any_of": [
+                      "input.slots.comms_type == \"Newsletter\"",
+                      "input.slots.planning_period != \"\""
+                    ]
+                  },
+                  "count(input.slots.senders) > 0",
+                  "count(input.slots.keywords) > 0"
+                ]
+              },
+              {
+                "any_of": [
+                  "count(input.slots.email_evidence) > 0",
+                  {
+                    "all_of": [
+                      "input.slots.use_user_material == true",
+                      "input.slots.user_material != \"\""
+                    ]
+                  }
+                ]
+              },
+              "input.slots.draft != \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_comms_type",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 comms_type；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.comms_type == null"
+            ]
+          }
+        },
+        {
+          "target": "collect_scope_name",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 scope_name；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.scope_name == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_reporting_period",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 reporting_period；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "input.slots.reporting_period == \"\""
+            ]
+          }
+        },
+        {
+          "target": "collect_planning_period",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 planning_period；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              {
+                "all_of": [
+                  "input.slots.comms_type == \"3P\"",
+                  "input.slots.planning_period == \"\""
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "target": "collect_senders",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 senders；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.senders) == 0"
+            ]
+          }
+        },
+        {
+          "target": "collect_keywords",
+          "description": "当前问题和明确修改均已处理，直接收集仍缺失的 keywords；结合上下文选择，不重问已有值。",
+          "guard": {
+            "all_of": [
+              "input.stage_execution.doActivity.execution_status == \"success\"",
+              "count(input.slots.keywords) == 0"
+            ]
+          }
+        }
+      ]
+    },
+    "completed": {
+      "kind": "termination",
+      "description": "用户已经明确接受当前完整稿；不发送邮件、不修改 Gmail。",
+      "entry": null,
+      "doActivity": null,
+      "exit": null,
+      "transitions": []
+    }
+  },
+  "policies": {}
+}

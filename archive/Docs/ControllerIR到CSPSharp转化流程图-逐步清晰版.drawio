@@ -1,0 +1,118 @@
+<mxfile host="Electron" agent="Codex">
+  <diagram id="controller-ir-to-csp-stepwise" name="ControllerIR到CSPSharp-逐步清晰版">
+    <mxGraphModel dx="4108" dy="2402" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3200" pageHeight="2390" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=50;fontStyle=1;fontColor=#19334F;fontFamily=Microsoft YaHei;" value="ControllerIR → CSP#：代码与 LLM 的逐步转换流程" vertex="1">
+          <mxGeometry height="70" width="3090" x="55" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="codeLane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=4;fillColor=#F5FAF8;strokeColor=#A8CFC4;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="2100" width="2100" x="40" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="llmLane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=4;fillColor=#F8F7FF;strokeColor=#B5A9D7;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="2100" width="980" x="2180" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="codeHeader" parent="1" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=34;fontStyle=1;fontColor=#176B57;fontFamily=Microsoft YaHei;" value="CODE｜确定性转换步骤" vertex="1">
+          <mxGeometry height="55" width="1900" x="75" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="llmHeader" parent="1" style="text;html=0;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=34;fontStyle=1;fontColor=#493A77;fontFamily=Microsoft YaHei;" value="LLM｜两次语义补全" vertex="1">
+          <mxGeometry height="55" width="880" x="2220" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;01 · Code｜读取、归一化、结构校验&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;input.py&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;读取 JSON / JSONC；中文字段转为英文 schema；检查顶层字段、初始阶段和阶段引用。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="135" width="1960" x="100" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;02 · Code｜生成有限状态数据&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;abstraction.py&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;slots、state_schema、stages 和 policy 引用 → constants、variables、current_stage。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="135" width="1960" x="100" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;03 · Code｜创建进程列表&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;pipeline.py / build_processes&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;按 action.executor 归类动作；创建子系统进程，并追加 workflow_controller 与 policy_checker。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="135" width="1960" x="100" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;04 · Code｜准备动作转换信息&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;conditions.py / transitions.py&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;条件 → guard；提取 state_schema 副作用；展开 ASK_SLOT；为传统系统动作准备安全的 LLM 输入。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="155" width="1960" x="100" y="795" as="geometry" />
+        </mxCell>
+        <mxCell id="llm1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EEF2FF;strokeColor=#6574C4;strokeWidth=3.5;align=left;verticalAlign=top;spacing=17;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;05 · LLM 1｜推断动作效果&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:21px;line-height:1.35;margin-top:10px&quot;&gt;&lt;b&gt;何时调用：&lt;/b&gt;生成转移时；每个传统系统动作调用一次&lt;br&gt;&lt;b&gt;输入：&lt;/b&gt;当前动作、发生阶段、可公开的参与者信息、要收集的内容、可修改的状态及允许值、代码已确定的变化&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;建议“哪些状态应改成什么值”&lt;br&gt;&lt;b&gt;不发送：&lt;/b&gt;参与者私密配置&lt;/div&gt;" vertex="1">
+          <mxGeometry height="250" width="880" x="2230" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;06 · Code｜校验 effects，生成全部 Transition&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;transitions.py&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;拒绝未知变量、越界值和冲突；合并代码 / LLM effects；生成 action、stage、policy、termination 转移。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="155" width="1960" x="100" y="1020" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;07 · Code｜组合系统，生成基础 CSP_IR&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;pipeline.py&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;进程使用 interleave 组合；加入无死锁、完成可达和最终完成检查；构造基础 CSP_IR。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="155" width="1960" x="100" y="1215" as="geometry" />
+        </mxCell>
+        <mxCell id="llm2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EEF2FF;strokeColor=#6574C4;strokeWidth=3.5;align=left;verticalAlign=top;spacing=17;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;08 · LLM 2｜提出额外验证项&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:21px;line-height:1.35;margin-top:10px&quot;&gt;&lt;b&gt;何时调用：&lt;/b&gt;基础状态模型建成后&lt;br&gt;&lt;b&gt;输入：&lt;/b&gt;系统目标与策略、全部状态与动作关系、代码已有的验证项&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;建议还应检查哪些状态，以及写成哪些 PAT 断言&lt;br&gt;最多 3 个状态条件 + 3 条断言；可达性或 LTL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="270" width="880" x="2230" y="1175" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;09 · Code｜校验并追加业务检查&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;pipeline.py / validate_llm_checks&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;检查谓词、事件和系统引用；规范化 LTL；追加到基础检查，得到最终 CSP_IR。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="155" width="1960" x="100" y="1485" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;10 · Code｜严格校验并生成转换报告&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;models/csp_ir.py&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;校验标识符、类型、值域和跨字段引用；记录 decisions、warnings、unresolved、statistics。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="145" width="1960" x="100" y="1680" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EAF7F3;strokeColor=#299B80;strokeWidth=3;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:30px&quot;&gt;&lt;b&gt;11 · Code｜确定性渲染 CSP#&lt;/b&gt;　&lt;span style=&quot;font-size:21px;color:#607286&quot;&gt;renderer.py&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;margin-top:9px&quot;&gt;按固定顺序输出 constants、variables、processes、system、predicates 和 #assert。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="145" width="1960" x="100" y="1870" as="geometry" />
+        </mxCell>
+        <mxCell id="output" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=14;fillColor=#E7F1FB;strokeColor=#4A78A8;strokeWidth=4;align=left;verticalAlign=middle;spacing=18;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:31px&quot;&gt;&lt;b&gt;12 · 输出产物&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:23px;line-height:1.4;margin-top:9px&quot;&gt;*.csp_ir.json　结构化模型　｜　*.csp　CSP# 文本&lt;br&gt;*.conversion_report.json　转换报告　｜　在线模式：*.llm_trace.json&lt;/div&gt;" vertex="1">
+          <mxGeometry height="165" width="1960" x="100" y="2060" as="geometry" />
+        </mxCell>
+        <mxCell id="pat" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFF1E6;strokeColor=#D48B47;strokeWidth=3;align=left;verticalAlign=top;spacing=17;fontColor=#20334C;fontFamily=Microsoft YaHei;" value="&lt;div style=&quot;font-size:29px&quot;&gt;&lt;b&gt;可选 PAT｜--verify&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size:21px;line-height:1.4;margin-top:10px&quot;&gt;&lt;b&gt;输入：&lt;/b&gt;生成的 CSP# 与每条断言&lt;br&gt;&lt;b&gt;输出：&lt;/b&gt;actual、expected、反例 / 见证轨迹、verification.json&lt;/div&gt;" vertex="1">
+          <mxGeometry height="190" width="880" x="2230" y="1845" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="n1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" target="n2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" target="n3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" target="n4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#6574C4;fontSize=21;fontColor=#493A77;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="llm1" value="调用">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="llm1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#6574C4;fontSize=21;fontColor=#493A77;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.82;entryX=1;entryY=0.45;" target="n5" value="Effect[]">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2160" y="960" />
+              <mxPoint x="2160" y="1090" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="n5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" target="n6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="n6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#6574C4;fontSize=21;fontColor=#493A77;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.45;" target="llm2" value="调用">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="llm2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#6574C4;fontSize=20;fontColor=#493A77;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.82;entryX=1;entryY=0.45;" target="n7" value="Predicate[] + Assertion[]">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2160" y="1400" />
+              <mxPoint x="2160" y="1550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="n7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" target="n8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="n8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" target="n9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="n9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3.5;strokeColor=#526D89;" target="output">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="n9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;strokeColor=#D48B47;dashed=1;fontSize=20;fontColor=#6D4925;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="pat" value="--verify">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="pat" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;strokeColor=#D48B47;dashed=1;fontSize=20;fontColor=#6D4925;fontFamily=Microsoft YaHei;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.85;entryX=1;entryY=0.5;" target="output" value="verification.json">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2160" y="2010" />
+              <mxPoint x="2160" y="2140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
